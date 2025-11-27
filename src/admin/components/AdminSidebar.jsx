@@ -9,6 +9,7 @@ function AdminSidebar() {
     { path: "/admin/rooms", label: "Manage Rooms" },
     { path: "/admin/bookings", label: "Manage Bookings" },
     { path: "/admin/users", label: "Manage Users" },
+    { path: "/admin/hotels", label: "Manage Hotel" },
   ];
 
   const isActive = (path) => {

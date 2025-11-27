@@ -1,24 +1,39 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Table, Button } from "react-bootstrap";
 import BookingModal from "../components/BookingModal";
+import bookingService from "../../services/bookingService";
 
 function Bookings() {
-  const [bookings, setBookings] = useState([
-    { id: 1, user: "Alice", room: "Deluxe", date: "2025-12-01", status: "Confirmed" },
-    { id: 2, user: "Bob", room: "Suite", date: "2025-12-05", status: "Pending" },
-  ]);
-
+  const [bookings, setBookings] = useState([]);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        const data = await bookingService.getAll();
+        setBookings(data); // đảm bảo data là mảng
+      } catch (err) {
+        console.error("Error fetching bookings:", err);
+        setBookings([]); // fallback
+      }
+    };
+    fetchBookings();
+  }, []);
 
   const handleView = (booking) => {
     setSelectedBooking(booking);
     setShowModal(true);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm("Are you sure to delete this booking?")) {
-      setBookings(bookings.filter(b => b.id !== id));
+      try {
+        await bookingService.delete(id);
+        setBookings(bookings.filter((b) => b.id !== id));
+      } catch (err) {
+        console.error("Delete failed:", err);
+      }
     }
   };
 
@@ -29,21 +44,27 @@ function Bookings() {
         <thead>
           <tr>
             <th>ID</th>
-            <th>User</th>
-            <th>Room</th>
-            <th>Date</th>
+            <th>User ID</th>
+            <th>Hotel ID</th>
+            <th>Room ID</th>
+            <th>Check-in</th>
+            <th>Check-out</th>
             <th>Status</th>
+            <th>Total</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {bookings.map((b) => (
+          {(bookings || []).map((b) => (
             <tr key={b.id}>
               <td>{b.id}</td>
-              <td>{b.user}</td>
-              <td>{b.room}</td>
-              <td>{b.date}</td>
+              <td>{b.userId}</td>
+              <td>{b.hotelId}</td>
+              <td>{b.roomId}</td>
+              <td>{new Date(b.checkingDate).toLocaleString()}</td>
+              <td>{new Date(b.checkoutDate).toLocaleString()}</td>
               <td>{b.status}</td>
+              <td>${b.totalAmount}</td>
               <td>
                 <Button variant="info" size="sm" onClick={() => handleView(b)}>View</Button>{" "}
                 <Button variant="danger" size="sm" onClick={() => handleDelete(b.id)}>Delete</Button>

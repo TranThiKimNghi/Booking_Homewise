@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Rooms from "./pages/Rooms";
 import Bookings from "./pages/Bookings";
 import Users from "./pages/Users";
+import Hotels from "./pages/Hotels";
 
 function AdminLayout({ children }) {
   return (
@@ -60,6 +61,15 @@ function AdminRoutes() {
         element={
           <AdminLayout>
             <Users />
+          </AdminLayout>
+        }
+      />
+
+       <Route
+        path="/hotels"   // <- thêm route hotels
+        element={
+          <AdminLayout>
+            <Hotels />
           </AdminLayout>
         }
       />

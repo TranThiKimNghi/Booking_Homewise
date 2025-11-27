@@ -1,15 +1,26 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import RoomModal from "../components/RoomModal";
 import { Table, Button } from "react-bootstrap";
+import roomService from "../../services/roomService";
 
 function Rooms() {
-  const [rooms, setRooms] = useState([
-    { id: 1, name: "Deluxe Room", price: 120 },
-    { id: 2, name: "Suite Room", price: 200 },
-  ]);
-
+  const [rooms, setRooms] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editingRoom, setEditingRoom] = useState(null);
+
+  // Load rooms từ API
+  const fetchRooms = async () => {
+    try {
+      const data = await roomService.getAll();
+      setRooms(data);
+    } catch (err) {
+      console.error("Error fetching rooms:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchRooms();
+  }, []);
 
   const handleAdd = () => {
     setEditingRoom(null);
@@ -21,24 +32,30 @@ function Rooms() {
     setShowModal(true);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this room?")) {
-      setRooms(rooms.filter((r) => r.id !== id));
+      try {
+        await roomService.delete(id);
+        setRooms(rooms.filter((r) => r.id !== id));
+      } catch (err) {
+        console.error("Delete failed:", err);
+      }
     }
   };
 
-  const handleSave = (room) => {
-    const index = rooms.findIndex((r) => r.id === room.id);
-    if (index > -1) {
-      // update
-      const updated = [...rooms];
-      updated[index] = room;
-      setRooms(updated);
+  const handleSave = async (room) => {
+  try {
+    if (room.id) {
+      await roomService.update(room);
     } else {
-      // add
-      setRooms([...rooms, room]);
+      await roomService.create(room);
     }
-  };
+    fetchRooms(); // gọi lại để cập nhật danh sách
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 
   return (
     <div>
@@ -49,18 +66,22 @@ function Rooms() {
       <Table striped bordered hover>
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Room Name</th>
+            <th>Room Number</th>
+            <th>Type</th>
             <th>Price</th>
+            <th>Status</th>
+            <th>Description</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           {rooms.map((room) => (
             <tr key={room.id}>
-              <td>{room.id}</td>
-              <td>{room.name}</td>
+              <td>{room.roomNumber}</td>
+              <td>{room.roomType}</td>
               <td>${room.price}</td>
+              <td>{room.status}</td>
+              <td>{room.description}</td>
               <td>
                 <Button variant="warning" size="sm" onClick={() => handleEdit(room)}>
                   Edit
@@ -79,6 +100,7 @@ function Rooms() {
         handleClose={() => setShowModal(false)}
         handleSave={handleSave}
         roomData={editingRoom}
+        defaultHotelId="" // truyền hotelId mặc định nếu có
       />
     </div>
   );
