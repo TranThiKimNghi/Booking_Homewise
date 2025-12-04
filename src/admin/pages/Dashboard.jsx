@@ -1,96 +1,68 @@
-import React from "react";
-import { Card, Row, Col, ProgressBar } from "react-bootstrap";
+import React, { useEffect, useState } from "react";
+import { Container, Row, Col, Card } from "react-bootstrap";
+import { FaUsers, FaBed, FaHotel, FaBook, FaDollarSign } from "react-icons/fa";
+import userService from "../../services/userService";
+import roomService from "../../services/roomService";
+import hotelService from "../../services/hotelService";
+import bookingService from "../../services/bookingService";
 
 function Dashboard() {
+  const [userCount, setUserCount] = useState(0);
+  const [roomCount, setRoomCount] = useState(0);
+  const [hotelCount, setHotelCount] = useState(0);
+  const [bookingCount, setBookingCount] = useState(0);
+  const [revenue, setRevenue] = useState(0);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const users = await userService.getAll();
+        setUserCount(users.length);
+
+        const rooms = await roomService.getAll();
+        setRoomCount(rooms.length);
+
+        const hotels = await hotelService.getAll();
+        setHotelCount(hotels.length);
+
+        const bookings = await bookingService.getAll();
+        setBookingCount(bookings.length);
+        setRevenue(bookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0));
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
   const stats = [
-    { title: "Total Rooms", value: 48, sub: "Available: 30 | Occupied: 18" },
-    { title: "Total Bookings (Today)", value: 12, sub: "6 confirmed · 3 pending · 3 cancelled" },
-    { title: "Total Users", value: 210, sub: "New this week: 15" },
+    { title: "Users", count: userCount, icon: <FaUsers size={30} />, bg: "primary" },
+    { title: "Rooms", count: roomCount, icon: <FaBed size={30} />, bg: "success" },
+    { title: "Hotels", count: hotelCount, icon: <FaHotel size={30} />, bg: "warning" },
+    { title: "Bookings", count: bookingCount, icon: <FaBook size={30} />, bg: "info" },
+    { title: "Revenue", count: `$${revenue.toLocaleString()}`, icon: <FaDollarSign size={30} />, bg: "danger" },
   ];
 
-  const occupancy = 65; // % phòng đang được đặt (mock)
-  const revenue = 75;   // % doanh thu so với target (mock)
-
   return (
-    <div>
-      {/* Title + Subtitle */}
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <div>
-          <h2 className="mb-1">Dashboard</h2>
-          <small className="text-muted">
-            Tổng quan hoạt động khách sạn hôm nay
-          </small>
-        </div>
-        <div className="text-end">
-          <span className="badge bg-primary me-2">Admin</span>
-          <span className="text-muted">Last update: just now</span>
-        </div>
-      </div>
-
-      {/* 3 cards statistics */}
-      <Row className="mb-4">
-        {stats.map((stat, index) => (
-          <Col key={index} md={4} className="mb-3">
-            <Card className="shadow-sm border-0 h-100">
-              <Card.Body>
-                <Card.Title className="text-muted" style={{ fontSize: "0.9rem" }}>
-                  {stat.title}
-                </Card.Title>
-                <div
-                  style={{
-                    fontSize: "2rem",
-                    fontWeight: "700",
-                    margin: "0.25rem 0 0.5rem",
-                  }}
-                >
-                  {stat.value}
+    <Container className="mt-4">
+      <h2 className="mb-4 text-center">Dashboard</h2>
+      <Row className="g-4">
+        {stats.map((stat, idx) => (
+          <Col key={idx} xs={12} sm={6} md={4} lg={3}>
+            <Card className={`text-white bg-${stat.bg} h-100 shadow`}>
+              <Card.Body className="d-flex align-items-center">
+                <div className="me-3">{stat.icon}</div>
+                <div>
+                  <Card.Title>{stat.count}</Card.Title>
+                  <Card.Text>{stat.title}</Card.Text>
                 </div>
-                <Card.Text className="text-muted" style={{ fontSize: "0.85rem" }}>
-                  {stat.sub}
-                </Card.Text>
               </Card.Body>
             </Card>
           </Col>
         ))}
       </Row>
-
-      {/* Occupancy & Revenue */}
-      <Row>
-        <Col md={6} className="mb-3">
-          <Card className="shadow-sm border-0 h-100">
-            <Card.Body>
-              <div className="d-flex justify-content-between align-items-center mb-2">
-                <Card.Title className="mb-0" style={{ fontSize: "1rem" }}>
-                  Tỉ lệ lấp đầy phòng
-                </Card.Title>
-                <span className="fw-bold">{occupancy}%</span>
-              </div>
-              <ProgressBar now={occupancy} label={`${occupancy}%`} />
-              <small className="text-muted d-block mt-2">
-                Số phòng đã đặt so với tổng số phòng.
-              </small>
-            </Card.Body>
-          </Card>
-        </Col>
-
-        <Col md={6} className="mb-3">
-          <Card className="shadow-sm border-0 h-100">
-            <Card.Body>
-              <div className="d-flex justify-content-between align-items-center mb-2">
-                <Card.Title className="mb-0" style={{ fontSize: "1rem" }}>
-                  Doanh thu tháng (so với mục tiêu)
-                </Card.Title>
-                <span className="fw-bold">{revenue}%</span>
-              </div>
-              <ProgressBar variant="success" now={revenue} label={`${revenue}%`} />
-              <small className="text-muted d-block mt-2">
-                Doanh thu hiện tại so với mục tiêu đặt ra trong tháng.
-              </small>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </div>
+    </Container>
   );
 }
 

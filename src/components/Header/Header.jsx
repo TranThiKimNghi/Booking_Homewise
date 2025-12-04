@@ -1,13 +1,31 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import keycloak from "../../keycloak/Keycloak";
 
 function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState("");
 
+  // Kiểm tra login khi load component
   useEffect(() => {
-    setIsLoggedIn(keycloak.authenticated);
-  }, [keycloak.authenticated]);
+    const logged = localStorage.getItem("isLoggedIn") === "true";
+    const user = localStorage.getItem("username") || "";
+    setIsLoggedIn(logged);
+    setUsername(user);
+  }, []);
+
+  const handleLogin = () => {
+    localStorage.setItem("isLoggedIn", "true");
+    localStorage.setItem("username", "User"); // hoặc username thực
+    setIsLoggedIn(true);
+    setUsername("User");
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("username");
+    setIsLoggedIn(false);
+    setUsername("");
+  };
 
   return (
     <header style={{ width: "100%", position: "sticky", top: 0, zIndex: 1000 }}>
@@ -49,7 +67,7 @@ function Header() {
             Khách sạn
           </Link>
 
-          {isLoggedIn && (
+          {isLoggedIn ? (
             <>
               <Link
                 to="/profile"
@@ -59,10 +77,10 @@ function Header() {
                   fontWeight: 500,
                 }}
               >
-                {keycloak.tokenParsed?.preferred_username || "Profile"}
+                {username}
               </Link>
               <button
-                onClick={() => keycloak.logout()}
+                onClick={handleLogout}
                 style={{
                   padding: "0.4rem 1rem",
                   borderRadius: "8px",
@@ -76,31 +94,31 @@ function Header() {
                 Logout
               </button>
             </>
-          )}
-
-          {!isLoggedIn && (
+          ) : (
             <>
-              <Link
-                to="/login"
+              <button
+                onClick={handleLogin}
                 style={{
                   padding: "0.4rem 1rem",
                   border: "1px solid white",
                   borderRadius: "8px",
                   color: "white",
-                  textDecoration: "none",
+                  backgroundColor: "transparent",
+                  cursor: "pointer",
+                  fontWeight: 500,
                   transition: "0.3s",
                 }}
-                onMouseEnter={(e) =>
-                  ((e.target.style.backgroundColor = "white"),
-                  (e.target.style.color = "#1e90ff"))
-                }
-                onMouseLeave={(e) =>
-                  ((e.target.style.backgroundColor = "transparent"),
-                  (e.target.style.color = "white"))
-                }
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = "white";
+                  e.target.style.color = "#1e90ff";
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = "transparent";
+                  e.target.style.color = "white";
+                }}
               >
                 Đăng nhập
-              </Link>
+              </button>
               <Link
                 to="/register"
                 style={{
