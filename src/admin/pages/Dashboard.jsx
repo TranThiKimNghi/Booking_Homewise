@@ -17,19 +17,24 @@ function Dashboard() {
     const fetchDashboardData = async () => {
       try {
         const users = await userService.getAll();
-        setUserCount(users.length);
+        setUserCount(Array.isArray(users) ? users.length : 0);
 
         const rooms = await roomService.getAll();
-        setRoomCount(rooms.length);
+        setRoomCount(Array.isArray(rooms) ? rooms.length : 0);
 
         const hotels = await hotelService.getAll();
-        setHotelCount(hotels.length);
+        setHotelCount(Array.isArray(hotels) ? hotels.length : 0);
 
         const bookings = await bookingService.getAll();
-        setBookingCount(bookings.length);
-        setRevenue(bookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0));
+        setBookingCount(Array.isArray(bookings) ? bookings.length : 0);
+
+        const totalRevenue = Array.isArray(bookings)
+          ? bookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0)
+          : 0;
+
+        setRevenue(totalRevenue);
       } catch (err) {
-        console.error(err);
+        console.error("Dashboard load error:", err);
       }
     };
 

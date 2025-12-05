@@ -6,35 +6,40 @@ function HotelModal({ show, handleClose, handleSave, hotelData }) {
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [rating, setRating] = useState(0);
+  const [rating, setRating] = useState("");
 
   useEffect(() => {
     if (hotelData) {
-      setName(hotelData.name);
-      setAddress(hotelData.address);
-      setPhone(hotelData.phone);
-      setEmail(hotelData.email);
-      setRating(hotelData.rating);
+      setName(hotelData.name || "");
+      setAddress(hotelData.address || "");
+      setPhone(hotelData.phone || "");
+      setEmail(hotelData.email || "");
+      setRating(hotelData.rating ?? "");
     } else {
       setName("");
       setAddress("");
       setPhone("");
       setEmail("");
-      setRating(0);
+      setRating("");
     }
   }, [hotelData]);
 
   const handleSubmit = () => {
+    if (!name.trim()) {
+      alert("Hotel name required");
+      return;
+    }
+    
     const hotel = {
       id: hotelData ? hotelData.id : undefined,
       name,
       address,
       phone,
       email,
-      rating,
+      rating: Number(rating)
     };
+
     handleSave(hotel);
-    handleClose();
   };
 
   return (
@@ -44,14 +49,17 @@ function HotelModal({ show, handleClose, handleSave, hotelData }) {
       </Modal.Header>
       <Modal.Body>
         <Form>
+
           <Form.Group className="mb-3">
             <Form.Label>Hotel Name</Form.Label>
             <Form.Control
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              placeholder="Enter hotel name"
             />
           </Form.Group>
+
           <Form.Group className="mb-3">
             <Form.Label>Address</Form.Label>
             <Form.Control
@@ -60,6 +68,7 @@ function HotelModal({ show, handleClose, handleSave, hotelData }) {
               onChange={(e) => setAddress(e.target.value)}
             />
           </Form.Group>
+
           <Form.Group className="mb-3">
             <Form.Label>Phone</Form.Label>
             <Form.Control
@@ -68,6 +77,7 @@ function HotelModal({ show, handleClose, handleSave, hotelData }) {
               onChange={(e) => setPhone(e.target.value)}
             />
           </Form.Group>
+
           <Form.Group className="mb-3">
             <Form.Label>Email</Form.Label>
             <Form.Control
@@ -76,18 +86,24 @@ function HotelModal({ show, handleClose, handleSave, hotelData }) {
               onChange={(e) => setEmail(e.target.value)}
             />
           </Form.Group>
+
           <Form.Group className="mb-3">
             <Form.Label>Rating</Form.Label>
             <Form.Control
               type="number"
+              min="0"
+              max="10"
               value={rating}
-              onChange={(e) => setRating(Number(e.target.value))}
+              onChange={(e) => setRating(e.target.value)}
             />
           </Form.Group>
+
         </Form>
       </Modal.Body>
+
       <Modal.Footer>
         <Button variant="secondary" onClick={handleClose}>Cancel</Button>
+
         <Button variant="primary" onClick={handleSubmit}>
           {hotelData ? "Update" : "Add"}
         </Button>

@@ -8,11 +8,11 @@ function Hotels() {
   const [selectedHotel, setSelectedHotel] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
-  // Lấy danh sách hotels từ API
+  // Load hotel list
   const fetchHotels = async () => {
     try {
       const data = await hotelService.getAll();
-      setHotels(data);
+      setHotels(data ?? []);
     } catch (err) {
       console.error("Error fetching hotels:", err);
       setHotels([]);
@@ -23,46 +23,56 @@ function Hotels() {
     fetchHotels();
   }, []);
 
+  // ADD
   const handleAdd = () => {
     setSelectedHotel(null);
     setShowModal(true);
   };
 
+  // EDIT
   const handleEdit = (hotel) => {
     setSelectedHotel(hotel);
     setShowModal(true);
   };
 
+  // SAVE Add/Update
   const handleSave = async (hotel) => {
     try {
       if (hotel.id) {
-        // update
         await hotelService.update(hotel.id, hotel);
       } else {
-        // add
         await hotelService.create(hotel);
       }
+
+      setShowModal(false);
+      setSelectedHotel(null);
       fetchHotels();
+
     } catch (err) {
       console.error("Error saving hotel:", err);
     }
   };
 
+  // DELETE
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure to delete this hotel?")) {
-      try {
-        await hotelService.delete(id);
-        setHotels(hotels.filter((h) => h.id !== id));
-      } catch (err) {
-        console.error("Error deleting hotel:", err);
-      }
+    if (!window.confirm("Are you sure to delete this hotel?")) return;
+
+    try {
+      await hotelService.delete(id);
+      setHotels((prev) => prev.filter((h) => h.id !== id));
+    } catch (err) {
+      console.error("Error deleting hotel:", err);
     }
   };
 
   return (
     <div>
       <h2 className="mb-4">Manage Hotels</h2>
-      <Button className="mb-3" onClick={handleAdd}>Add Hotel</Button>
+
+      <Button className="mb-3" onClick={handleAdd}>
+        Add Hotel
+      </Button>
+
       <Table striped bordered hover>
         <thead>
           <tr>
@@ -76,26 +86,50 @@ function Hotels() {
           </tr>
         </thead>
         <tbody>
-          {(hotels || []).map((h) => (
-            <tr key={h.id}>
-              <td>{h.id}</td>
-              <td>{h.name}</td>
-              <td>{h.address}</td>
-              <td>{h.phone}</td>
-              <td>{h.email}</td>
-              <td>{h.rating}</td>
-              <td>
-                <Button variant="warning" size="sm" onClick={() => handleEdit(h)}>Edit</Button>{" "}
-                <Button variant="danger" size="sm" onClick={() => handleDelete(h.id)}>Delete</Button>
+
+          {hotels.length === 0 ? (
+            <tr>
+              <td colSpan="7" style={{ textAlign: "center" }}>
+                No hotels found.
               </td>
             </tr>
-          ))}
+          ) : (
+            hotels.map((h) => (
+              <tr key={h.id}>
+                <td>{h.id}</td>
+                <td>{h.name}</td>
+                <td>{h.address}</td>
+                <td>{h.phone}</td>
+                <td>{h.email}</td>
+                <td>{h.rating}</td>
+                <td>
+                  <Button
+                    variant="warning"
+                    size="sm"
+                    onClick={() => handleEdit(h)}
+                  >
+                    Edit
+                  </Button>{" "}
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => handleDelete(h.id)}
+                  >
+                    Delete
+                  </Button>
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </Table>
 
       <HotelModal
         show={showModal}
-        handleClose={() => setShowModal(false)}
+        handleClose={() => {
+          setShowModal(false);
+          setSelectedHotel(null);
+        }}
         handleSave={handleSave}
         hotelData={selectedHotel}
       />

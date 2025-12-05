@@ -2,50 +2,69 @@ import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 
 function UserModal({ show, handleClose, handleSave, userData }) {
-  const [name, setName] = useState("");
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [role, setRole] = useState("");
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (userData) {
-      setName(userData.name || "");
+      setFullName(userData.fullName || "");
       setEmail(userData.email || "");
-      setPhone(userData.phone || "");
+      setPhoneNumber(userData.phoneNumber || "");
       setRole(userData.role || "");
     } else {
-      setName("");
+      setFullName("");
       setEmail("");
-      setPhone("");
+      setPhoneNumber("");
       setRole("");
     }
-  }, [userData]);
+    setErrors({});
+  }, [userData, show]);
+
+  const validate = () => {
+    let err = {};
+    if (!fullName) err.fullName = "Required";
+    if (!email) err.email = "Required";
+    if (!role) err.role = "Required";
+    return err;
+  };
 
   const handleSubmit = () => {
+    const err = validate();
+    if (Object.keys(err).length > 0) {
+      setErrors(err);
+      return;
+    }
+
     handleSave({
-      id: userData ? userData.id : Date.now(),
-      name,
+      id: userData ? userData.id : undefined,
+      fullName,
       email,
-      phone,
+      phoneNumber,
       role,
     });
+
     handleClose();
   };
 
   return (
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
-        <Modal.Title>{userData ? "Edit User" : "Add User"}</Modal.Title>
+        <Modal.Title>{userData ? "Cập nhật người dùng" : "Thêm người dùng"}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form>
+
           <Form.Group className="mb-3">
-            <Form.Label>Name</Form.Label>
+            <Form.Label>Họ tên</Form.Label>
             <Form.Control
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter name"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="Nhập họ tên"
             />
+            {errors.fullName && <small className="text-danger">{errors.fullName}</small>}
           </Form.Group>
 
           <Form.Group className="mb-3">
@@ -54,39 +73,42 @@ function UserModal({ show, handleClose, handleSave, userData }) {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter email"
+              placeholder="Nhập email"
             />
+            {errors.email && <small className="text-danger">{errors.email}</small>}
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Phone</Form.Label>
+            <Form.Label>Số điện thoại</Form.Label>
             <Form.Control
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="Enter phone number"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              placeholder="Nhập số điện thoại"
             />
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Role</Form.Label>
+            <Form.Label>Vai trò</Form.Label>
             <Form.Select
               value={role}
               onChange={(e) => setRole(e.target.value)}
             >
-              <option value="">Select role</option>
+              <option value="">Chọn vai trò</option>
               <option value="admin">Admin</option>
-              <option value="staff">Staff</option>
-              <option value="customer">Customer</option>
+              <option value="staff">Nhân viên</option>
+              <option value="customer">Khách hàng</option>
             </Form.Select>
+            {errors.role && <small className="text-danger">{errors.role}</small>}
           </Form.Group>
+
         </Form>
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={handleClose}>
-          Cancel
+          Hủy
         </Button>
         <Button variant="primary" onClick={handleSubmit}>
-          {userData ? "Update" : "Add"}
+          {userData ? "Cập nhật" : "Thêm mới"}
         </Button>
       </Modal.Footer>
     </Modal>

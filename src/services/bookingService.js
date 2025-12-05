@@ -1,13 +1,13 @@
-// src/services/bookingService.js
-import axios from "axios";
+import api from '../services/api';
 
-const BASE_URL = "http://34.177.103.163:8083/api/bookings";
+const BASE_URL = "/bookings";
+
 
 const bookingService = {
   getAll: async () => {
     try {
-      const res = await axios.get(BASE_URL);
-      return res.data.data;
+      const res = await api.get(BASE_URL);
+      return res.data;
     } catch (error) {
       console.error("Error fetching bookings:", error);
       throw error;
@@ -16,8 +16,8 @@ const bookingService = {
 
   getById: async (id) => {
     try {
-      const res = await axios.get(`${BASE_URL}/${id}`);
-      return res.data.data;
+      const res = await api.get(`${BASE_URL}/${id}`);
+      return res.data;
     } catch (error) {
       console.error("Error fetching booking:", error);
       throw error;
@@ -26,8 +26,8 @@ const bookingService = {
 
   create: async (data) => {
     try {
-      const res = await axios.post(BASE_URL, data);
-      return res.data.data;
+      const res = await api.post(BASE_URL, data);
+      return res.data;
     } catch (error) {
       console.error("Error creating booking:", error);
       throw error;
@@ -36,8 +36,8 @@ const bookingService = {
 
   update: async (id, data) => {
     try {
-      const res = await axios.put(`${BASE_URL}/${id}`, data);
-      return res.data.data;
+      const res = await api.put(`${BASE_URL}/${id}`, data);
+      return res.data;
     } catch (error) {
       console.error("Error updating booking:", error);
       throw error;
@@ -46,8 +46,8 @@ const bookingService = {
 
   delete: async (id) => {
     try {
-      const res = await axios.delete(`${BASE_URL}/${id}`);
-      return res.data.data;
+      const res = await api.delete(`${BASE_URL}/${id}`);
+      return res.data;
     } catch (error) {
       console.error("Error deleting booking:", error);
       throw error;
