@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import keycloak from "../../keycloak/Keycloak"; // import instance Keycloak
+import keycloak from "../../../keycloak/KeycloakProvider"; // import instance Keycloak
 
 function Register() {
   useEffect(() => {

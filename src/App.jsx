@@ -3,27 +3,28 @@ import AppRoutes from "./routes/AppRoutes";
 import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
 
-function App({ authenticated }) {
-  if (authenticated === null) {
-    return <div>Loading...</div>;
-  }
+function App() {
 
   return (
     <div className="d-flex flex-column min-vh-100 bg-light">
+      
+      {/* Header */}
       <header>
         <div className="container my-3">
           <div className="bg-white rounded shadow p-3">
-            <Header isLoggedIn={authenticated} />
+            <Header />
           </div>
         </div>
       </header>
 
+      {/* App Routes */}
       <main className="flex-fill container my-3">
         <div className="bg-white rounded shadow p-4">
-          <AppRoutes isLoggedIn={authenticated} />
+          <AppRoutes />
         </div>
       </main>
 
+      {/* Footer */}
       <footer className="mt-auto">
         <Footer />
       </footer>

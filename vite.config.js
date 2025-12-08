@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://34.177.103.163:8081", // backend của bạn
+        target: "http://34.177.103.163:8000", // backend của bạn
         changeOrigin: true,
       },
     },

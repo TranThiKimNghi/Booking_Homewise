@@ -6,15 +6,11 @@ import {
 import { FaMapMarkerAlt, FaStar, FaEye, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import hotelService from "../../services/hotelService";
+import TopNearby from "./TopNearbyList"; // nếu cùng folder
 
 // Cấu hình: Số khách sạn tối đa mỗi trang
 const HOTELS_PER_PAGE = 5; 
 
-/**
- * Component hiển thị danh sách khách sạn, áp dụng lọc và phân trang
- * @param {object} props
- * @param {object} props.filter - Điều kiện lọc (search, provinceId, rating)
- */
 function HotelList({ filter = {} }) { 
     const [allHotels, setAllHotels] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -159,6 +155,9 @@ function HotelList({ filter = {} }) {
                                             </p>
                                         </div>
 
+                                          <TopNearby hotelId={hotel.id} />
+
+
                                         <div className="mt-3 text-end"> 
                                             <Button 
                                                 variant="primary" 
@@ -169,6 +168,9 @@ function HotelList({ filter = {} }) {
                                                 <FaEye className="me-2" /> Xem Chi tiết & Đặt phòng
                                             </Button>
                                         </div>
+
+
+                            
                                     </Card.Body>
                                 </Col>
                             </Row>

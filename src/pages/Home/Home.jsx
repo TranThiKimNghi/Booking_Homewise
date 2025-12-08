@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Container, Row, Col, Card, Button, Form, Dropdown,Spinner,} from "react-bootstrap";
+import { Container, Row, Col, Card, Button, Form, Dropdown, Spinner, } from "react-bootstrap";
 import { FaUserFriends, FaMapMarkerAlt, FaSearch } from "react-icons/fa";
 import Banner from "../../components/Header/Banner";
-import hotelService from "../../services/hotelService"; 
-import keycloak from "../../keycloak/Keycloak";
+import hotelService from "../../services/hotelService";
+import keycloak from "../../keycloak/KeycloakProvider";
+import nearbyService from "../../services/nearbyService"; 
 
 // Hàm tiện ích: lấy ngày hôm nay và ngày mai để đặt mặc định
 const getToday = () => new Date().toISOString().split('T')[0];
@@ -30,12 +31,17 @@ function Home() {
     const [hotels, setHotels] = useState([]);
     const [loadingHotels, setLoadingHotels] = useState(true);
     const [errorHotels, setErrorHotels] = useState("");
+    // State nearby places
 
+    const [nearbyPlaces, setNearbyPlaces] = useState([]);
+    const [loadingNearby, setLoadingNearby] = useState(false);
+
+    // Fetch danh sách khách sạn nổi bật
     useEffect(() => {
         const fetchHotels = async () => {
             try {
                 setLoadingHotels(true);
-                const data = await hotelService.getAll(); 
+                const data = await hotelService.getAll();
                 setHotels(Array.isArray(data) ? data : []);
             } catch (err) {
                 console.error("Error fetching hotels:", err);
@@ -47,6 +53,27 @@ function Home() {
 
         fetchHotels();
     }, []);
+
+// Fetch danh sách địa điểm gần của khách sạn đầu tiên
+    useEffect(() => {
+        const fetchNearby = async () => {
+            if (hotels.length > 0) {
+                try {
+                    setLoadingNearby(true);
+                    const hotelId = hotels[0].id; // lấy khách sạn đầu tiên
+                    const data = await nearbyService.getTopNearby(hotelId);
+                    setNearbyPlaces(Array.isArray(data) ? data : []);
+                } catch (err) {
+                    console.error("Error fetching nearby:", err);
+                } finally {
+                    setLoadingNearby(false);
+                }
+            }
+        };
+
+        fetchNearby();
+    }, [hotels]);
+
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -62,7 +89,7 @@ function Home() {
             keycloak.login();
             return;
         }
-        
+
         // 3. Thực hiện chuyển hướng
         const queryParams = new URLSearchParams({
             destination,
@@ -77,7 +104,7 @@ function Home() {
     };
 
     const guestText = `${adults} Người lớn · ${children} Trẻ em · ${rooms} Phòng`;
-    
+
     // Thiết lập ràng buộc cho Date Picker
     const handleCheckInChange = (e) => {
         const newCheckIn = e.target.value;
@@ -100,7 +127,7 @@ function Home() {
                 <Form onSubmit={handleSearch}>
                     <Card className="shadow-lg border-0" style={{ borderRadius: "12px" }}>
                         <Row className="g-0">
-                            
+
                             {/* Cột 1: Điểm đến */}
                             <Col md={2} sm={12} className="p-3">
                                 <div className="d-flex align-items-center">
@@ -118,7 +145,7 @@ function Home() {
                                     </div>
                                 </div>
                             </Col>
-                            
+
                             {/* Cột 2: Ngày */}
                             <Col md={4} sm={12} className="p-3" style={{ borderLeft: "1px solid #e3e3e3", borderRight: "1px solid #e3e3e3" }}>
                                 <Row className="g-2">
@@ -159,7 +186,7 @@ function Home() {
                                         >
                                             {/* *** ĐIỂM ĐÃ SỬA: Thay as={Form.Control} bằng as="div" để tránh lỗi thẻ rỗng (void element) *** */}
                                             <Dropdown.Toggle
-                                                as="div" 
+                                                as="div"
                                                 className="d-flex align-items-center justify-content-between border rounded px-2 py-1"
                                                 style={{ cursor: "pointer", backgroundColor: "#fff", height: 'auto' }}
                                             >
@@ -172,7 +199,7 @@ function Home() {
 
                                             {/* Dropdown Menu logic giữ nguyên */}
                                             <Dropdown.Menu align="end" style={{ minWidth: "260px", padding: "1rem" }} onClick={(e) => e.stopPropagation()}>
-                                                
+
                                                 {/* Người lớn */}
                                                 <div className="d-flex justify-content-between align-items-center mb-2">
                                                     <span>Người lớn</span>
@@ -264,7 +291,7 @@ function Home() {
                                     </Col>
                                 </Row>
                             </Col>
-                            
+
                         </Row>
                     </Card>
                 </Form>
@@ -304,8 +331,8 @@ function Home() {
                                         <Card.Text className="mb-2">
                                             {[...Array(Math.min(5, hotel.rating || 4))].map((_, i) => <span key={i} className="text-warning">★</span>)}
                                         </Card.Text>
-                                        
-                                        <div className="mt-auto"> 
+
+                                        <div className="mt-auto">
                                             <Button variant="outline-primary" as={Link} to={`/rooms?hotelId=${hotel.id}`} className="w-100">
                                                 Xem phòng
                                             </Button>
@@ -317,6 +344,36 @@ function Home() {
                     </Row>
                 )}
             </Container>
+
+
+            {/* Top Nearby Places */}
+            <Container className="mb-5">
+                <h2 className="mb-4 text-center">📍 Điểm đến gần khách sạn nổi bật</h2>
+
+                {loadingNearby ? (
+                    <div className="text-center py-4">
+                        <Spinner animation="border" />
+                        <p className="mt-2">Đang tải địa điểm gần...</p>
+                    </div>
+                ) : nearbyPlaces.length === 0 ? (
+                    <p className="text-center text-muted">Chưa có địa điểm gần để hiển thị.</p>
+                ) : (
+                    <Row>
+                        {nearbyPlaces.map((place) => (
+                            <Col md={4} key={place.id} className="mb-3">
+                                <Card className="shadow-sm" style={{ borderRadius: "10px" }}>
+                                    <Card.Body>
+                                        <h5 className="text-primary">{place.placeName}</h5>
+                                        <p className="text-muted small">{place.category || "Địa điểm gần"}</p>
+                                        <p className="fw-bold">{place.distance ? `${place.distance} km` : ""}</p>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        ))}
+                    </Row>
+                )}
+            </Container>
+
         </div>
     );
 }
