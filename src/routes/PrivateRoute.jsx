@@ -1,4 +1,4 @@
-import { Navigate } from "react-router-dom";
+/*import { Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext.jsx";
 
 export default function PrivateRoute({ children }) {
@@ -10,3 +10,4 @@ export default function PrivateRoute({ children }) {
 
   return children;
 }
+*/

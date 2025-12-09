@@ -1,13 +1,13 @@
-import api from "../services/api";
+import axios from "axios";
 
-const BASE_URL = "/nearby";
+const BASE_URL = "http://localhost:8082/api/nearby";
 
 const nearbyService = {
 
     // Lấy top địa điểm gần khách sạn
     getTopNearby: async (hotelId) => {
         try {
-            const res = await api.get(`${BASE_URL}/${hotelId}/top-nearby`);
+            const res = await axios.get(`${BASE_URL}/${hotelId}/top-nearby`);
             return res.data;
         } catch (error) {
             console.error("Error fetching nearby places:", error.response || error);

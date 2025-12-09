@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from "react";
+/*import { createContext, useContext, useState, useEffect } from "react";
 import Keycloak from "keycloak-js";
 
 const KeycloakContext = createContext(null);
@@ -30,4 +30,4 @@ export function useKeycloakAuth() {
 }
 
 
-export default KeycloakProvider;
+export default KeycloakProvider;*/

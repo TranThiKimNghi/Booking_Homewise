@@ -1,12 +1,12 @@
-import api from '../services/api';
+import axios from "axios";
 
-const BASE_URL = "/booking-details";
+const BASE_URL = "http://localhost:8083/api/booking-details";
 
 
 const booking_detailService = {
   getAll: async () => {
     try {
-      const res = await api.get(BASE_URL);
+      const res = await axios.get(BASE_URL);
       return res.data.data;
     } catch (error) {
       console.error("Error fetching bookings:", error);
@@ -16,7 +16,7 @@ const booking_detailService = {
 
   getById: async (id) => {
     try {
-      const res = await api.get(`${BASE_URL}/${id}`);
+      const res = await axios.get(`${BASE_URL}/${id}`);
       return res.data.data;
     } catch (error) {
       console.error("Error fetching booking:", error);
@@ -26,7 +26,7 @@ const booking_detailService = {
 
   create: async (data) => {
     try {
-      const res = await api.post(BASE_URL, data);
+      const res = await axios.post(BASE_URL, data);
       return res.data.data;
     } catch (error) {
       console.error("Error creating booking:", error);
@@ -36,7 +36,7 @@ const booking_detailService = {
 
   update: async (id, data) => {
     try {
-      const res = await api.put(`${BASE_URL}/${id}`, data);
+      const res = await axios.put(`${BASE_URL}/${id}`, data);
       return res.data.data;
     } catch (error) {
       console.error("Error updating booking:", error);
@@ -46,7 +46,7 @@ const booking_detailService = {
 
   delete: async (id) => {
     try {
-      const res = await api.delete(`${BASE_URL}/${id}`);
+      const res = await axios.delete(`${BASE_URL}/${id}`);
       return res.data.data;
     } catch (error) {
       console.error("Error deleting booking:", error);
