@@ -1,8 +1,8 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 
-import AdminLayout from "../admin/layout/AdminLayout";
-import AdminGuard from "../pages/Auth/admin/AdminGuard";
+// import AdminLayout from "../admin/layout/AdminLayout";
+// import AdminGuard from "../pages/Auth/admin/AdminGuard";
 import Dashboard from "../admin/pages/Dashboard";
 import Rooms from "../admin/pages/Rooms";
 import Bookings from "../admin/pages/Bookings";

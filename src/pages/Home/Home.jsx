@@ -4,7 +4,7 @@ import { Container, Row, Col, Card, Button, Form, Dropdown, Spinner, } from "rea
 import { FaUserFriends, FaMapMarkerAlt, FaSearch } from "react-icons/fa";
 import Banner from "../../components/Header/Banner";
 import hotelService from "../../services/hotelService";
-import keycloak from "../../keycloak/KeycloakProvider";
+// import keycloak from "../../keycloak/KeycloakProvider";
 import nearbyService from "../../services/nearbyService"; 
 
 // Hàm tiện ích: lấy ngày hôm nay và ngày mai để đặt mặc định
@@ -84,11 +84,11 @@ function Home() {
             return;
         }
 
-        // 2. Kiểm tra đăng nhập
-        if (!keycloak.authenticated) {
-            keycloak.login();
-            return;
-        }
+        // // 2. Kiểm tra đăng nhập
+        // if (!keycloak.authenticated) {
+        //     keycloak.login();
+        //     return;
+        // }
 
         // 3. Thực hiện chuyển hướng
         const queryParams = new URLSearchParams({

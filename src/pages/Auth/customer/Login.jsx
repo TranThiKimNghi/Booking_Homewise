@@ -1,13 +1,13 @@
-import { useAuth } from "../../../contexts/AuthContext";
+// import { useAuth } from "../../../contexts/AuthContext";
 
-function LoginGoogle({ googleToken, profile }) {
-  const { loginCustomer } = useAuth();
+// function LoginGoogle({ googleToken, profile }) {
+//   const { loginCustomer } = useAuth();
 
-  const handleGoogleLogin = () => {
-    loginCustomer(googleToken, profile);
-  };
+//   const handleGoogleLogin = () => {
+//     loginCustomer(googleToken, profile);
+//   };
 
-  return <button onClick={handleGoogleLogin}>Login Google</button>;
-}
+//   return <button onClick={handleGoogleLogin}>Login Google</button>;
+// }
 
-export default LoginGoogle;
+// export default LoginGoogle;
