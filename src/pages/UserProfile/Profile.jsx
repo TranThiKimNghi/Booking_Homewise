@@ -1,40 +1,101 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { Form, Button, Card, Alert, Spinner } from "react-bootstrap";
+import customerService from "../../services/customerService";
 
 function Profile() {
-  const user = { name: "John Doe", email: "john@example.com", avatar: "https://i.pravatar.cc/150?img=3" };
+  const [customer, setCustomer] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    if (!token) return;
+
+    const loadData = async () => {
+      try {
+        const res = await customerService.getInfo(token);
+        setCustomer(res.data);
+      } catch (err) {
+        setError("Không tải được thông tin người dùng.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      await customerService.update(token, {
+        fullname: customer.fullname,
+        phone: customer.phone,
+      });
+
+      setMessage("Cập nhật thông tin thành công!");
+      setError("");
+    } catch (err) {
+      setError("Lỗi cập nhật. Vui lòng thử lại!");
+      setMessage("");
+    }
+  };
+
+  if (loading)
+    return (
+      <div className="text-center mt-5">
+        <Spinner animation="border" />
+      </div>
+    );
+
+  if (!customer) return <h3 className="text-center">Không có dữ liệu</h3>;
 
   return (
-    <div className="d-flex justify-content-center mt-5">
-      <div 
-        className="card shadow p-4"
-        style={{
-          maxWidth: "400px",
-          borderRadius: "15px",
-          backgroundColor: "#f8f9fa"
-        }}
-      >
-        <div className="text-center mb-4">
-          <img
-            src={user.avatar}
-            alt="User Avatar"
-            className="rounded-circle"
-            style={{ width: "100px", height: "100px", objectFit: "cover", border: "3px solid #0d6efd" }}
-          />
-        </div>
-        <h3 className="text-center mb-3" style={{ color: "#0d6efd" }}>
-          {user.name}
-        </h3>
-        <div className="mb-2">
-          <strong>Email:</strong>
-          <p className="text-muted">{user.email}</p>
-        </div>
-        <button
-          className="btn btn-primary w-100"
-          style={{ borderRadius: "10px" }}
-        >
-          Edit Profile
-        </button>
-      </div>
+    <div className="container mt-4" style={{ maxWidth: "600px" }}>
+      <Card className="shadow-sm p-4">
+        <h3 className="text-center mb-3">Thông tin tài khoản</h3>
+
+        {message && <Alert variant="success">{message}</Alert>}
+        {error && <Alert variant="danger">{error}</Alert>}
+
+        <Form onSubmit={handleSubmit}>
+          <Form.Group className="mb-3">
+            <Form.Label>Họ và tên</Form.Label>
+            <Form.Control
+              type="text"
+              value={customer.fullname}
+              onChange={(e) =>
+                setCustomer({ ...customer, fullname: e.target.value })
+              }
+              required
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Email</Form.Label>
+            <Form.Control type="email" value={customer.email} disabled />
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Số điện thoại</Form.Label>
+            <Form.Control
+              type="text"
+              value={customer.phone}
+              onChange={(e) =>
+                setCustomer({ ...customer, phone: e.target.value })
+              }
+              required
+            />
+          </Form.Group>
+
+          <Button type="submit" variant="primary" className="w-100">
+            Cập nhật
+          </Button>
+        </Form>
+      </Card>
     </div>
   );
 }

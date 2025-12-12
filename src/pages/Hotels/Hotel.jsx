@@ -4,32 +4,31 @@ import HotelList from "../components/Hotel/HotelList";
 import { FaSearch, FaMapMarkedAlt, FaStar } from "react-icons/fa";
 import { Card, Form, InputGroup, Row, Col } from "react-bootstrap";
 
-// Ánh xạ Tên thân thiện với ID GUID của API
+// Province mapping: (bạn nhớ đổi lại bằng provinceId thật từ backend)
 const PROVINCE_MAPPING = {
   "3fa85f64-5717-4562-b3fc-2c963f66afa6": "TP.HCM",
   "a0a9b8c7-6d54-3e21-b1f0-987654321cba": "Hà Nội",
   "e9f8g7h6-5i4j-3k2l-1m0n-o1p2q3r4s5t6": "Đà Nẵng",
 };
-// Danh sách các ID để render Dropdown
-const PROVINCE_OPTIONS = Object.entries(PROVINCE_MAPPING);
 
+const PROVINCE_OPTIONS = Object.entries(PROVINCE_MAPPING);
 
 function HotelsPage() {
   const [search, setSearch] = useState("");
-  const [provinceId, setProvinceId] = useState(""); // Đổi tên state từ city sang provinceId
+  const [provinceId, setProvinceId] = useState("");
   const [rating, setRating] = useState("");
 
-  // Tạo đối tượng filterProps để truyền xuống
   const filterProps = { search, provinceId, rating };
 
   return (
     <div className="container py-5">
-      {/* 🏞️ Banner */}
+
+      {/* Banner */}
       <div
         className="p-5 mb-5 text-center text-white shadow-lg d-flex flex-column justify-content-center align-items-center"
         style={{
           backgroundImage:
-            'linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url("https://images.unsplash.com/photo-1501117716987-c8e1ecb210f1")',
+            'linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url("https://images.unsplash.com/photo-1501117716987-c8e1ecb210f1")',
           backgroundSize: "cover",
           backgroundPosition: "center",
           borderRadius: "15px",
@@ -44,20 +43,20 @@ function HotelsPage() {
         </p>
       </div>
 
-      {/* ⚙️ Bộ lọc Nâng cao */}
+      {/* Bộ lọc */}
       <Card className="shadow-sm mb-5 p-3">
         <Card.Body>
           <Card.Title className="mb-4 text-primary d-flex align-items-center">
             <FaSearch className="me-2" /> Bộ lọc Khách sạn
           </Card.Title>
+
           <Row className="g-3">
-            {/* 1. Tìm kiếm tên */}
+
+            {/* Tìm theo tên */}
             <Col md={4}>
               <Form.Group>
                 <InputGroup>
-                  <InputGroup.Text>
-                    <FaSearch />
-                  </InputGroup.Text>
+                  <InputGroup.Text><FaSearch /></InputGroup.Text>
                   <Form.Control
                     type="text"
                     placeholder="Tìm theo tên khách sạn..."
@@ -68,36 +67,33 @@ function HotelsPage() {
               </Form.Group>
             </Col>
 
-            {/* 2. Lọc theo Tỉnh/Thành (provinceId) */}
+            {/* Tỉnh/Thành */}
             <Col md={4}>
               <Form.Group>
                 <InputGroup>
-                  <InputGroup.Text>
-                    <FaMapMarkedAlt />
-                  </InputGroup.Text>
-                  <Form.Select 
-                    value={provinceId} // Sử dụng state mới
-                    onChange={(e) => setProvinceId(e.target.value)} // Cập nhật state mới
+                  <InputGroup.Text><FaMapMarkedAlt /></InputGroup.Text>
+                  <Form.Select
+                    value={provinceId}
+                    onChange={(e) => setProvinceId(e.target.value)}
                   >
                     <option value="">Chọn tỉnh/thành</option>
                     {PROVINCE_OPTIONS.map(([id, name]) => (
-                      <option key={id} value={id}>
-                        {name}
-                      </option>
+                      <option key={id} value={id}>{name}</option>
                     ))}
                   </Form.Select>
                 </InputGroup>
               </Form.Group>
             </Col>
 
-            {/* 3. Lọc theo Đánh giá sao */}
+            {/* Rating */}
             <Col md={4}>
               <Form.Group>
                 <InputGroup>
-                  <InputGroup.Text>
-                    <FaStar />
-                  </InputGroup.Text>
-                  <Form.Select value={rating} onChange={(e) => setRating(e.target.value)}>
+                  <InputGroup.Text><FaStar /></InputGroup.Text>
+                  <Form.Select
+                    value={rating}
+                    onChange={(e) => setRating(e.target.value)}
+                  >
                     <option value="">Đánh giá sao</option>
                     <option value="5">⭐ 5 sao</option>
                     <option value="4">⭐ 4 sao</option>
@@ -106,11 +102,12 @@ function HotelsPage() {
                 </InputGroup>
               </Form.Group>
             </Col>
+
           </Row>
         </Card.Body>
       </Card>
 
-      {/* 🏨 Danh sách khách sạn (Truyền props lọc xuống) */}
+      {/* Danh sách khách sạn */}
       <HotelList filter={filterProps} />
 
       <style jsx="true">{`

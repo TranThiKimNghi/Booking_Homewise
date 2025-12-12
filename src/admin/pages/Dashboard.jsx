@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Card } from "react-bootstrap";
 import { FaUsers, FaBed, FaHotel, FaBook, FaDollarSign } from "react-icons/fa";
-import { useAuth } from "../../contexts/AuthContext";
-import userService from "../../services/userService";
+import { useNavigate } from "react-router-dom";
+
+import userService from "../../services/customerService";
 import roomService from "../../services/roomService";
 import hotelService from "../../services/hotelService";
 import bookingService from "../../services/bookingService";
-import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
-  const { token } = useAuth();
   const navigate = useNavigate();
 
   const [stats, setStats] = useState({
@@ -21,17 +20,21 @@ function Dashboard() {
   });
 
   useEffect(() => {
-    if (!token) return navigate("/admin/login");
+    // kiểm tra admin có login chưa
+    const isAdmin = localStorage.getItem("isAdmin");
+
+    if (isAdmin !== "true") {
+      return navigate("/admin/login");
+    }
 
     const loadDashboard = async () => {
       try {
-        const headers = { Authorization: `Bearer ${token}` };
-
+        // KHÔNG truyền token nữa
         const [users, rooms, hotels, bookings] = await Promise.all([
-          userService.getAll(headers),
-          roomService.getAll(headers),
-          hotelService.getAll(headers),
-          bookingService.getAll(headers),
+          userService.getAll(),
+          roomService.getAll(),
+          hotelService.getAll(),
+          bookingService.getAll(),
         ]);
 
         const safeUsers = Array.isArray(users) ? users.length : 0;
@@ -52,16 +55,11 @@ function Dashboard() {
         });
       } catch (error) {
         console.error("Dashboard fetch error:", error);
-        
-        // Nếu token sai => logout
-        if (error.response?.status === 401) {
-          navigate("/admin/login");
-        }
       }
     };
 
     loadDashboard();
-  }, [token]);
+  }, []);
 
   const statCards = [
     { title: "Users", value: stats.users, icon: <FaUsers size={30} />, bg: "primary" },

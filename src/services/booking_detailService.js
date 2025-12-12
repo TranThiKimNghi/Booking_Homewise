@@ -55,4 +55,4 @@ const booking_detailService = {
   },
 };
 
-export default bookingService;
+export default booking_detailService;

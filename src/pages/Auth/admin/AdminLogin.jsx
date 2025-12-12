@@ -1,28 +1,53 @@
-// import { useEffect } from "react";
-// import { useKeycloakAuth } from "../../../keycloak/KeycloakProvider"; 
-// import { useAuth } from "../../../contexts/AuthContext"; // đúng đường dẫn
-// import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import authService from "../../../services/authService";
+import { useNavigate } from "react-router-dom";
 
-// function AdminLogin() {
-//   const keycloak = useKeycloakAuth();   // hook => luôn gọi như function
-//   const { loginAdmin } = useAuth();     // lấy hàm loginAdmin từ Context
-//   const navigate = useNavigate();
+function AdminLogin() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-  
-//     useEffect(() => {
-//     keycloak.init({ onLoad: "login-required" }).then(authenticated => {
-//       if (authenticated) {
-//         const token = keycloak.token;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-//         // truyền token + instance
-//         loginAdmin(token, keycloak);
+    try {
+      const res = await authService.login(email, password);
 
-//         navigate("/admin");
-//       }
-//     });
-//   }, []);
+      alert("Đăng nhập thành công!");
 
-//   return <div>Redirecting to Admin Login...</div>;
-// }
+      navigate("/admin/dashboard");
+    } catch (err) {
+      alert("Sai tài khoản hoặc mật khẩu!");
+    }
+  };
 
-// export default AdminLogin;
+  return (
+    <div className="container mt-5 col-md-4">
+      <h3 className="mb-3 text-center">Admin Login</h3>
+
+      <form onSubmit={handleSubmit}>
+        <div className="mb-3">
+          <label>Email</label>
+          <input
+            type="email"
+            className="form-control"
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+
+        <div className="mb-3">
+          <label>Password</label>
+          <input
+            type="password"
+            className="form-control"
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+
+        <button className="btn btn-primary w-100">Đăng nhập</button>
+      </form>
+    </div>
+  );
+}
+
+export default AdminLogin;

@@ -7,7 +7,7 @@ const bookingService = {
   getAll: async () => {
     try {
       const res = await axios.get(BASE_URL);
-      return res.data.data;
+      return res.data;
     } catch (error) {
       console.error("Error fetching bookings:", error);
       throw error;
@@ -17,7 +17,7 @@ const bookingService = {
   getById: async (id) => {
     try {
       const res = await axios.get(`${BASE_URL}/${id}`);
-      return res.data.data;
+      return res.data;
     } catch (error) {
       console.error("Error fetching booking:", error);
       throw error;
@@ -27,9 +27,9 @@ const bookingService = {
   create: async (data) => {
     try {
       const res = await axios.post(BASE_URL, data);
-      return res.data.data;
+      return res.data;
     } catch (error) {
-      console.error("Error creating booking:", error);
+      console.error("Error creating booking:",error.response?.data);
       throw error;
     }
   },
@@ -37,7 +37,7 @@ const bookingService = {
   update: async (id, data) => {
     try {
       const res = await axios.put(`${BASE_URL}/${id}`, data);
-      return res.data.data;
+      return res.data;
     } catch (error) {
       console.error("Error updating booking:", error);
       throw error;

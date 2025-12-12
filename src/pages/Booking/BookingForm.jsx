@@ -59,7 +59,7 @@ function BookingForm() {
     setSuccess("");
 
     // --- TẠO user GIẢ LẬP khi chưa login ---
-    const testUser = { id: 1, name: "Test User", role: "CUSTOMER" };
+    const testUser = { id: "87c709ad-fb94-4c3b-a95f-56e87203c9a2", name: "Test User", role: "CUSTOMER" };
 
     // --- Validate ---
     if (!room) return setError("Không thể đặt phòng do thiếu thông tin.");

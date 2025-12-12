@@ -1,75 +1,30 @@
-import { createContext, useContext, useState, useEffect } from "react";
-import api from "../services/api";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
+export const AuthProvider = ({ children }) => {
+  const [token, setToken] = useState(localStorage.getItem("token") || null);
+  const [user, setUser] = useState(
+    JSON.parse(localStorage.getItem("user")) || null
+  );
 
-  // Load token từ localStorage khi mount lần đầu
-  useEffect(() => {
-    const savedCustomerToken = localStorage.getItem("customerToken");
-    const savedAdminToken = localStorage.getItem("adminToken");
-
-    const savedToken = savedCustomerToken || savedAdminToken;
-
-    if (savedToken) {
-      setToken(savedToken);
-
-      // Cấu hình axios
-      api.defaults.headers.common["Authorization"] = `Bearer ${savedToken}`;
-
-      // Nếu muốn, có thể set user role từ token/localStorage
-      if (savedCustomerToken) {
-        setUser({ role: "CUSTOMER" }); // bạn có thể lưu thêm profile nếu cần
-      } else {
-        setUser({ role: "ADMIN" });
-      }
-    }
-  }, []); // Chỉ chạy 1 lần khi mount → không gây loop
-
-  // Khi token update → cập nhật axios header
-  useEffect(() => {
-    if (token) {
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    } else {
-      delete api.defaults.headers.common["Authorization"];
-    }
-  }, [token]);
-
-  // CUSTOMER login (Google)
-  const loginCustomer = (googleToken, profile) => {
-    localStorage.setItem("customerToken", googleToken);
-
-    setToken(googleToken);
-    setUser({ role: "CUSTOMER", ...profile });
-  };
-
-  // ADMIN login (Keycloak)
-  const loginAdmin = (adminToken, keycloakInstance) => {
-    localStorage.setItem("adminToken", adminToken);
-
-    setToken(adminToken);
-    setUser({
-      role: "ADMIN",
-      keycloak: keycloakInstance,
-    });
+  const login = (token, user) => {
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(user));
+    setToken(token);
+    setUser(user);
   };
 
   const logout = () => {
-    localStorage.removeItem("customerToken");
-    localStorage.removeItem("adminToken");
-
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setToken(null);
     setUser(null);
   };
 
-  return (
-    <AuthContext.Provider value={{ user, token, loginCustomer, loginAdmin, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
-}
+  const value = { token, user, login, logout };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
 
 export const useAuth = () => useContext(AuthContext);

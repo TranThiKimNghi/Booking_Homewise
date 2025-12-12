@@ -1,21 +1,14 @@
-// import { Navigate } from "react-router-dom";
-// import { useKeycloakAuth } from "../../../keycloak/KeycloakProvider";
+import { Navigate } from "react-router-dom";
 
-// export default function AdminGuard({ children }) {
-//   const auth = useKeycloakAuth();
+function AdminGuard({ children }) {
+  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
 
-//   // Chưa init keycloak
-//   if (!auth.keycloak) return <div>Checking admin authentication...</div>;
+  if (!token || role !== "ADMIN") {
+    return <Navigate to="/admin/login" replace />;
+  }
 
-//   // Không login thì chuyển login admin
-//   if (!auth.authenticated) return <Navigate to="/admin/login" />;
+  return children;
+}
 
-//   // Check quyền admin trong Keycloak
-//   const roles = auth.keycloak?.tokenParsed?.realm_access?.roles || [];
-
-//   if (!roles.includes("admin")) {
-//     return <Navigate to="/unauthorized" />;
-//   }
-
-//   return children;
-// }
+export default AdminGuard;

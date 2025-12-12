@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import userService from "../../services/userService";
+import userService from "../../services/customerService";
 import UserModal from "../components/UserModal";
 
 function Users() {
