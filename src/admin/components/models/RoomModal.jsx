@@ -1,108 +1,102 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 
-function RoomModal({ show, handleClose, handleSave, roomData, defaultHotelId }) {
-  const [hotelId, setHotelId] = useState("");
+function RoomModal({ show, handleClose, handleSave, roomData }) {
   const [roomNumber, setRoomNumber] = useState("");
   const [roomType, setRoomType] = useState("");
-  const [price, setPrice] = useState(0);
-  const [status, setStatus] = useState("");
+  const [price, setPrice] = useState("");
+  const [status, setStatus] = useState("available");
   const [description, setDescription] = useState("");
+  const [errors, setErrors] = useState({});
 
-  // Khi mở modal cho edit / add mới
   useEffect(() => {
     if (roomData) {
-      // Edit
-      setHotelId(roomData.hotelId || "");
       setRoomNumber(roomData.roomNumber || "");
       setRoomType(roomData.roomType || "");
-      setPrice(roomData.price ?? 0);
-      setStatus(roomData.status || "");
+      setPrice(roomData.price || "");
+      setStatus(roomData.status || "available");
       setDescription(roomData.description || "");
     } else {
-      // Add mới
-      setHotelId(defaultHotelId || "");
       setRoomNumber("");
       setRoomType("");
-      setPrice(0);
-      setStatus("");
+      setPrice("");
+      setStatus("available");
       setDescription("");
     }
-  }, [roomData, defaultHotelId]);
+    setErrors({});
+  }, [roomData, show]);
+
+  const validate = () => {
+    let err = {};
+    if (!roomNumber) err.roomNumber = "Required";
+    if (!roomType) err.roomType = "Required";
+    if (!price || isNaN(price)) err.price = "Invalid price";
+    return err;
+  };
 
   const handleSubmit = () => {
-    const dto = {
-      id: roomData ? roomData.id : undefined, // create thì để undefined cho backend tự tạo
-      hotelId,
+    const err = validate();
+    if (Object.keys(err).length > 0) {
+      setErrors(err);
+      return;
+    }
+
+    handleSave({
+      id: roomData ? roomData.id : undefined,
       roomNumber,
       roomType,
-      price: Number(price),
+      price: parseFloat(price),
       status,
       description,
-    };
+    });
 
-    handleSave(dto);   // parent sẽ gọi API create/update ở đây
     handleClose();
   };
 
   return (
-    <Modal show={show} onHide={handleClose}>
+    <Modal show={show} onHide={handleClose} centered>
       <Modal.Header closeButton>
-        <Modal.Title>{roomData ? "Edit Room" : "Add Room"}</Modal.Title>
+        <Modal.Title>{roomData ? "Cập nhật phòng" : "Thêm phòng"}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form>
-          {/* Nếu hotelId đã biết sẵn (theo khách sạn đang chọn) có thể disable ô này */}
-          <Form.Group className="mb-3">
-            <Form.Label>Hotel ID</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Enter hotel ID"
-              value={hotelId}
-              onChange={(e) => setHotelId(e.target.value)}
-            />
-          </Form.Group>
-
           <Form.Group className="mb-3">
             <Form.Label>Room Number</Form.Label>
             <Form.Control
-              type="text"
-              placeholder="Enter room number"
               value={roomNumber}
               onChange={(e) => setRoomNumber(e.target.value)}
+              placeholder="Nhập số phòng"
             />
+            {errors.roomNumber && <small className="text-danger">{errors.roomNumber}</small>}
           </Form.Group>
 
           <Form.Group className="mb-3">
             <Form.Label>Room Type</Form.Label>
             <Form.Control
-              type="text"
-              placeholder="Enter room type"
               value={roomType}
               onChange={(e) => setRoomType(e.target.value)}
+              placeholder="Nhập loại phòng"
             />
+            {errors.roomType && <small className="text-danger">{errors.roomType}</small>}
           </Form.Group>
 
           <Form.Group className="mb-3">
             <Form.Label>Price</Form.Label>
             <Form.Control
-              type="number"
-              placeholder="Enter price"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
+              placeholder="Nhập giá phòng"
+              type="number"
             />
+            {errors.price && <small className="text-danger">{errors.price}</small>}
           </Form.Group>
 
           <Form.Group className="mb-3">
             <Form.Label>Status</Form.Label>
-            <Form.Select
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-            >
-              <option value="">Select status</option>
-              <option value="AVAILABLE">AVAILABLE</option>
-              <option value="BOOKED">BOOKED</option>
-              <option value="MAINTENANCE">MAINTENANCE</option>
+            <Form.Select value={status} onChange={(e) => setStatus(e.target.value)}>
+              <option value="available">Available</option>
+              <option value="booked">Booked</option>
+              <option value="maintenance">Maintenance</option>
             </Form.Select>
           </Form.Group>
 
@@ -110,20 +104,19 @@ function RoomModal({ show, handleClose, handleSave, roomData, defaultHotelId }) 
             <Form.Label>Description</Form.Label>
             <Form.Control
               as="textarea"
-              rows={3}
-              placeholder="Enter description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              placeholder="Mô tả phòng"
             />
           </Form.Group>
         </Form>
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={handleClose}>
-          Cancel
+          Hủy
         </Button>
         <Button variant="primary" onClick={handleSubmit}>
-          {roomData ? "Update" : "Add"}
+          {roomData ? "Cập nhật" : "Thêm mới"}
         </Button>
       </Modal.Footer>
     </Modal>

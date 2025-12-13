@@ -4,8 +4,10 @@ const BASE_URL = "http://localhost:8082/api/hotel-images";
 
 const hotelImageService = {
     // POST /api/hotel-images
-    upload: async (data) => {
-        const res = await axios.post(BASE_URL, data);
+    upload: async (formData) => {
+        const res = await axios.post(HOTEL_IMAGE_URL, formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
         return res.data;
     },
 
@@ -16,15 +18,10 @@ const hotelImageService = {
     },
 
     // GET /api/hotel-images/hotel/{hotelId}
-    getByHotelId: async (hotelId) => {
-        try {
-            const res = await axios.get(`${BASE_URL}/hotel/${hotelId}`);
-            return res.data.data || []; 
-        } catch (err) {
-            console.error("Fetch hotel images failed:", err);
-            return [];
-        }
-    }
+     getByHotelId: async (hotelId) => {
+    const res = await axios.get(`${BASE_URL}/hotel/${hotelId}`);
+    return res.data;
+  },
 };
 
 export default hotelImageService;

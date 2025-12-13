@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import userService from "../../services/customerService";
-import UserModal from "../components/UserModal";
+import UserModal from "../components/models/UserModal";
 
 function Users() {
   const [users, setUsers] = useState([]);
@@ -13,7 +13,7 @@ function Users() {
       const list = await userService.getAll();
       setUsers(list);
     } catch (err) {
-      console.log("Load user lỗi:", err);
+      console.error("Load user lỗi:", err);
     } finally {
       setLoading(false);
     }
@@ -26,12 +26,11 @@ function Users() {
   const handleSave = async (data) => {
     try {
       if (data.id) {
+        // Update user
         await userService.update(data.id, data);
-
-        setUsers((prev) =>
-          prev.map((u) => (u.id === data.id ? { ...u, ...data } : u))
-        );
+        setUsers((prev) => prev.map((u) => (u.id === data.id ? { ...u, ...data } : u)));
       } else {
+        // Create new user
         const newUser = await userService.create(data);
         setUsers((prev) => [...prev, newUser]);
       }
@@ -52,7 +51,6 @@ function Users() {
 
   return (
     <div>
-
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="fw-bold">Quản lý người dùng</h2>

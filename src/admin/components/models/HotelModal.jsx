@@ -7,6 +7,7 @@ function HotelModal({ show, handleClose, handleSave, hotelData }) {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [rating, setRating] = useState("");
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (hotelData) {
@@ -14,7 +15,7 @@ function HotelModal({ show, handleClose, handleSave, hotelData }) {
       setAddress(hotelData.address || "");
       setPhone(hotelData.phone || "");
       setEmail(hotelData.email || "");
-      setRating(hotelData.rating ?? "");
+      setRating(hotelData.rating || "");
     } else {
       setName("");
       setAddress("");
@@ -22,60 +23,74 @@ function HotelModal({ show, handleClose, handleSave, hotelData }) {
       setEmail("");
       setRating("");
     }
-  }, [hotelData]);
+    setErrors({});
+  }, [hotelData, show]);
+
+  const validate = () => {
+    const err = {};
+    if (!name) err.name = "Required";
+    if (!address) err.address = "Required";
+    if (!phone) err.phone = "Required";
+    if (email && !/\S+@\S+\.\S+/.test(email)) err.email = "Invalid email";
+    if (rating && (isNaN(rating) || rating < 0 || rating > 5))
+      err.rating = "Rating must be 0-5";
+    return err;
+  };
 
   const handleSubmit = () => {
-    if (!name.trim()) {
-      alert("Hotel name required");
+    const err = validate();
+    if (Object.keys(err).length > 0) {
+      setErrors(err);
       return;
     }
-    
-    const hotel = {
+
+    handleSave({
       id: hotelData ? hotelData.id : undefined,
       name,
       address,
       phone,
       email,
-      rating: Number(rating)
-    };
+      rating: rating ? parseFloat(rating) : 0,
+    });
 
-    handleSave(hotel);
+    handleClose();
   };
 
   return (
-    <Modal show={show} onHide={handleClose}>
+    <Modal show={show} onHide={handleClose} centered>
       <Modal.Header closeButton>
-        <Modal.Title>{hotelData ? "Edit Hotel" : "Add Hotel"}</Modal.Title>
+        <Modal.Title>{hotelData ? "Cập nhật khách sạn" : "Thêm khách sạn"}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form>
-
           <Form.Group className="mb-3">
-            <Form.Label>Hotel Name</Form.Label>
+            <Form.Label>Name</Form.Label>
             <Form.Control
-              type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Enter hotel name"
+              placeholder="Hotel name"
             />
+            {errors.name && <small className="text-danger">{errors.name}</small>}
           </Form.Group>
 
           <Form.Group className="mb-3">
             <Form.Label>Address</Form.Label>
             <Form.Control
-              type="text"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
+              placeholder="Hotel address"
             />
+            {errors.address && <small className="text-danger">{errors.address}</small>}
           </Form.Group>
 
           <Form.Group className="mb-3">
             <Form.Label>Phone</Form.Label>
             <Form.Control
-              type="text"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
+              placeholder="Phone number"
             />
+            {errors.phone && <small className="text-danger">{errors.phone}</small>}
           </Form.Group>
 
           <Form.Group className="mb-3">
@@ -84,28 +99,32 @@ function HotelModal({ show, handleClose, handleSave, hotelData }) {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
             />
+            {errors.email && <small className="text-danger">{errors.email}</small>}
           </Form.Group>
 
           <Form.Group className="mb-3">
             <Form.Label>Rating</Form.Label>
             <Form.Control
               type="number"
-              min="0"
-              max="10"
               value={rating}
               onChange={(e) => setRating(e.target.value)}
+              placeholder="0-5"
+              min="0"
+              max="5"
+              step="0.1"
             />
+            {errors.rating && <small className="text-danger">{errors.rating}</small>}
           </Form.Group>
-
         </Form>
       </Modal.Body>
-
       <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>Cancel</Button>
-
+        <Button variant="secondary" onClick={handleClose}>
+          Hủy
+        </Button>
         <Button variant="primary" onClick={handleSubmit}>
-          {hotelData ? "Update" : "Add"}
+          {hotelData ? "Cập nhật" : "Thêm mới"}
         </Button>
       </Modal.Footer>
     </Modal>

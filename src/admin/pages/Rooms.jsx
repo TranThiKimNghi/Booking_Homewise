@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import RoomModal from "../components/RoomModal";
 import { Table, Button } from "react-bootstrap";
+import RoomModal from "../components/models/RoomModal";
 import roomService from "../../services/roomService";
 
 function Rooms() {
@@ -8,7 +8,6 @@ function Rooms() {
   const [showModal, setShowModal] = useState(false);
   const [editingRoom, setEditingRoom] = useState(null);
 
-  // Load rooms từ API
   const fetchRooms = async () => {
     try {
       const data = await roomService.getAll();
@@ -33,39 +32,44 @@ function Rooms() {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this room?")) {
-      try {
-        await roomService.delete(id);
-        setRooms(rooms.filter((r) => r.id !== id));
-      } catch (err) {
-        console.error("Delete failed:", err);
-      }
+    if (!window.confirm("Bạn chắc chắn muốn xóa phòng này?")) return;
+    try {
+      await roomService.delete(id);
+      setRooms(rooms.filter((r) => r.id !== id));
+    } catch (err) {
+      alert("Xóa thất bại!");
+      console.error(err);
     }
   };
 
   const handleSave = async (room) => {
-  try {
-    if (room.id) {
-      await roomService.update(room);
-    } else {
-      await roomService.create(room);
+    try {
+      if (room.id) {
+        await roomService.update(room.id, room);
+      } else {
+        const newRoom = await roomService.create(room);
+        setRooms((prev) => [...prev, newRoom]);
+      }
+      fetchRooms();
+    } catch (err) {
+      console.error("Save room error:", err);
+      alert("Lưu phòng thất bại!");
     }
-    fetchRooms(); // gọi lại để cập nhật danh sách
-  } catch (err) {
-    console.error(err);
-  }
-};
-
+  };
 
   return (
     <div>
-      <h2 className="mb-4">Manage Rooms</h2>
-      <Button className="mb-3" onClick={handleAdd}>
-        Add Room
-      </Button>
-      <Table striped bordered hover>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h2>Manage Rooms</h2>
+        <Button variant="primary" onClick={handleAdd}>
+          + Add Room
+        </Button>
+      </div>
+
+      <Table striped bordered hover responsive>
         <thead>
           <tr>
+            <th>#</th>
             <th>Room Number</th>
             <th>Type</th>
             <th>Price</th>
@@ -75,23 +79,32 @@ function Rooms() {
           </tr>
         </thead>
         <tbody>
-          {rooms.map((room) => (
-            <tr key={room.id}>
-              <td>{room.roomNumber}</td>
-              <td>{room.roomType}</td>
-              <td>${room.price}</td>
-              <td>{room.status}</td>
-              <td>{room.description}</td>
-              <td>
-                <Button variant="warning" size="sm" onClick={() => handleEdit(room)}>
-                  Edit
-                </Button>{" "}
-                <Button variant="danger" size="sm" onClick={() => handleDelete(room.id)}>
-                  Delete
-                </Button>
+          {rooms.length === 0 ? (
+            <tr>
+              <td colSpan={7} className="text-center">
+                Chưa có phòng nào
               </td>
             </tr>
-          ))}
+          ) : (
+            rooms.map((r, i) => (
+              <tr key={r.id}>
+                <td>{i + 1}</td>
+                <td>{r.roomNumber}</td>
+                <td>{r.roomType}</td>
+                <td>${r.price}</td>
+                <td>{r.status}</td>
+                <td>{r.description}</td>
+                <td>
+                  <Button variant="warning" size="sm" onClick={() => handleEdit(r)} className="me-2">
+                    Edit
+                  </Button>
+                  <Button variant="danger" size="sm" onClick={() => handleDelete(r.id)}>
+                    Delete
+                  </Button>
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </Table>
 
@@ -100,7 +113,6 @@ function Rooms() {
         handleClose={() => setShowModal(false)}
         handleSave={handleSave}
         roomData={editingRoom}
-        defaultHotelId="" // truyền hotelId mặc định nếu có
       />
     </div>
   );

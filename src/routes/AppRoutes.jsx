@@ -1,58 +1,76 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
+import ProtectedRoute from "./ProtectedRoute";
 
-// User Pages
+/* ================= USER PAGES ================= */
 import Home from "../pages/Home/Home";
 import RoomList from "../pages/Rooms/RoomList";
 import BookingForm from "../pages/Booking/BookingForm";
 import Profile from "../pages/UserProfile/Profile";
 import HotelList from "../pages/Hotels/HotelList";
 
-// Auth (Customer)
-import Login from "../pages/Auth/customer/Login";
+/* ================= AUTH ================= */
+import Login from "../pages/Auth/customer/CustomerHome";
 import Register from "../pages/Auth/customer/Register";
+import AdminLogin from "../pages/Auth/admin/AdminLogin";
 
-// Admin
-import AdminLogin from "../pages/Auth/admin/AdminLogin"; 
+/* ================= ADMIN ================= */
 import AdminRoutes from "./AdminRoutes";
-import AdminGuard from "../pages/Auth/admin/AdminGuard";
 import AdminLayout from "../admin/layout/AdminLayout";
+
+/* ================= COMMON ================= */
+import Forbidden from "../pages/Error/Forbidden";
 
 function AppRoutes() {
   return (
     <Routes>
-      {/* --- USER ROUTES --- */}
+      {/* ===== PUBLIC ===== */}
       <Route path="/" element={<Home />} />
-      <Route path="/rooms" element={<RoomList />} />
-      <Route path="/booking" element={<BookingForm />} />
-      <Route path="/booking/:id" element={<BookingForm />} />
-      <Route path="/profile" element={<Profile />} />
       <Route path="/hotels" element={<HotelList />} />
+      <Route path="/rooms" element={<RoomList />} />
 
-      {/* --- AUTH (USER) --- */}
+      {/* ===== AUTH ===== */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-
-      {/* --- AUTH (ADMIN) --- */}
       <Route path="/admin/login" element={<AdminLogin />} />
-      
 
-      {/* --- ADMIN SECURED ROUTES --- */}
+      {/* ===== CUSTOMER PROTECTED ===== */}
       <Route
-        path="/admin/*"
+        path="/booking"
         element={
-          <AdminGuard>
-            <AdminLayout>
-              <AdminRoutes />
-            </AdminLayout>
-          </AdminGuard>
+          <ProtectedRoute role="customer">
+            <BookingForm />
+          </ProtectedRoute>
         }
       />
 
-      {/* --- 404 NOT FOUND --- */}
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute role="customer">
+            <Profile />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* ===== ADMIN PROTECTED ===== */}
+      <Route
+        path="/admin/*"
+        element={
+          <ProtectedRoute role="admin">
+            <AdminLayout>
+              <AdminRoutes />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* ===== ERROR ===== */}
+      <Route path="/403" element={<Forbidden />} />
+
       <Route
         path="*"
-        element={<h2 className="text-center mt-5">Page Not Found</h2>}
+        element={<h2 className="text-center mt-5">404 - Page Not Found</h2>}
       />
     </Routes>
   );

@@ -13,10 +13,10 @@ const roomImageService = {
     return res.data;
   },
 
-  getByRoom: async (roomId) => {
-    const res = await api.get(`/rooms/${roomId}/images`);
+  getByRoomId: async (roomId) => {
+    const res = await api.get(`${ROOM_IMAGE_URL}/room/${roomId}`);
     return res.data;
-  }
+  },
 };
 
 export default roomImageService;

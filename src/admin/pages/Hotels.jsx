@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Table, Button } from "react-bootstrap";
-import HotelModal from "../components/HotelModal";
+import HotelModal from "../components/models/HotelModal";
 import hotelService from "../../services/hotelService";
 
 function Hotels() {
@@ -8,7 +8,6 @@ function Hotels() {
   const [selectedHotel, setSelectedHotel] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
-  // Load hotel list
   const fetchHotels = async () => {
     try {
       const data = await hotelService.getAll();
@@ -23,60 +22,55 @@ function Hotels() {
     fetchHotels();
   }, []);
 
-  // ADD
   const handleAdd = () => {
     setSelectedHotel(null);
     setShowModal(true);
   };
 
-  // EDIT
   const handleEdit = (hotel) => {
     setSelectedHotel(hotel);
     setShowModal(true);
   };
 
-  // SAVE Add/Update
   const handleSave = async (hotel) => {
     try {
       if (hotel.id) {
         await hotelService.update(hotel.id, hotel);
       } else {
-        await hotelService.create(hotel);
+        const newHotel = await hotelService.create(hotel);
+        setHotels((prev) => [...prev, newHotel]);
       }
-
-      setShowModal(false);
-      setSelectedHotel(null);
       fetchHotels();
-
     } catch (err) {
       console.error("Error saving hotel:", err);
+      alert("Lưu khách sạn thất bại!");
     }
   };
 
-  // DELETE
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure to delete this hotel?")) return;
-
+    if (!window.confirm("Bạn chắc chắn muốn xóa khách sạn này?")) return;
     try {
       await hotelService.delete(id);
       setHotels((prev) => prev.filter((h) => h.id !== id));
     } catch (err) {
       console.error("Error deleting hotel:", err);
+      alert("Xóa thất bại!");
     }
   };
 
   return (
     <div>
-      <h2 className="mb-4">Manage Hotels</h2>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h2>Manage Hotels</h2>
+        <Button variant="primary" onClick={handleAdd}>
+          + Add Hotel
+        </Button>
+      </div>
 
-      <Button className="mb-3" onClick={handleAdd}>
-        Add Hotel
-      </Button>
-
-      <Table striped bordered hover>
+      <Table striped bordered hover responsive>
         <thead>
           <tr>
-            <th>ID</th>
+            <th>#</th>
             <th>Name</th>
             <th>Address</th>
             <th>Phone</th>
@@ -86,35 +80,26 @@ function Hotels() {
           </tr>
         </thead>
         <tbody>
-
           {hotels.length === 0 ? (
             <tr>
-              <td colSpan="7" style={{ textAlign: "center" }}>
-                No hotels found.
+              <td colSpan={7} className="text-center">
+                Chưa có khách sạn
               </td>
             </tr>
           ) : (
-            hotels.map((h) => (
+            hotels.map((h, i) => (
               <tr key={h.id}>
-                <td>{h.id}</td>
+                <td>{i + 1}</td>
                 <td>{h.name}</td>
                 <td>{h.address}</td>
                 <td>{h.phone}</td>
                 <td>{h.email}</td>
                 <td>{h.rating}</td>
                 <td>
-                  <Button
-                    variant="warning"
-                    size="sm"
-                    onClick={() => handleEdit(h)}
-                  >
+                  <Button variant="warning" size="sm" onClick={() => handleEdit(h)} className="me-2">
                     Edit
-                  </Button>{" "}
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => handleDelete(h.id)}
-                  >
+                  </Button>
+                  <Button variant="danger" size="sm" onClick={() => handleDelete(h.id)}>
                     Delete
                   </Button>
                 </td>

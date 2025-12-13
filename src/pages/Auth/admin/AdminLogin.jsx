@@ -1,50 +1,66 @@
 import React, { useState } from "react";
-import authService from "../../../services/authService";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../contexts/AuthContext";
+import authService from "../../../services/authService";
 
 function AdminLogin() {
+  const navigate = useNavigate();
+  const { login } = useAuth(); 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate();
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
     try {
-      const res = await authService.login(email, password);
+      const res = await authService.login({ email, password });
 
-      alert("Đăng nhập thành công!");
+      if (res.roles.toLowerCase() !== "admin") {
+        setError("Bạn không phải admin");
+        authService.logout();
+        return;
+      }
 
-      navigate("/admin/dashboard");
+      // Lưu token, role, user
+      login({
+        token: res.token,
+        role: res.roles.toLowerCase(),
+        user: { email },
+      });
+
+      navigate("/admin");
     } catch (err) {
-      alert("Sai tài khoản hoặc mật khẩu!");
+      console.error(err);
+      setError("Sai tài khoản hoặc mật khẩu");
     }
   };
 
   return (
-    <div className="container mt-5 col-md-4">
-      <h3 className="mb-3 text-center">Admin Login</h3>
+    <div className="container py-5" style={{ maxWidth: "400px" }}>
+      <h3 className="mb-4">Admin Login</h3>
+      {error && <div className="alert alert-danger">{error}</div>}
 
       <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label>Email</label>
-          <input
-            type="email"
-            className="form-control"
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
-
-        <div className="mb-3">
-          <label>Password</label>
-          <input
-            type="password"
-            className="form-control"
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-
-        <button className="btn btn-primary w-100">Đăng nhập</button>
+        <input
+          className="form-control mb-3"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          className="form-control mb-3"
+          placeholder="Mật khẩu"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <button type="submit" className="btn btn-danger w-100">
+          Đăng nhập Admin
+        </button>
       </form>
     </div>
   );

@@ -1,30 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import { Dropdown } from "react-bootstrap";
 
 function Header() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState("");
-
-  // Kiểm tra login khi load component
-  useEffect(() => {
-    const logged = localStorage.getItem("isLoggedIn") === "true";
-    const user = localStorage.getItem("username") || "";
-    setIsLoggedIn(logged);
-    setUsername(user);
-  }, []);
-
-  const handleLogin = () => {
-    localStorage.setItem("isLoggedIn", "true");
-    localStorage.setItem("username", "User"); // hoặc username thực
-    setIsLoggedIn(true);
-    setUsername("User");
-  };
+  const { isAuthenticated, user, role, logout } = useAuth();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("username");
-    setIsLoggedIn(false);
-    setUsername("");
+    logout();
+    navigate("/"); // quay về trang chủ sau logout
   };
 
   return (
@@ -67,44 +52,54 @@ function Header() {
             Khách sạn
           </Link>
 
-          {isLoggedIn ? (
+          {isAuthenticated ? (
             <>
-              <Link
-                to="/profile"
-                style={{
-                  color: "white",
-                  textDecoration: "none",
-                  fontWeight: 500,
-                }}
-              >
-                {username}
-              </Link>
-              <button
-                onClick={handleLogout}
-                style={{
-                  padding: "0.4rem 1rem",
-                  borderRadius: "8px",
-                  backgroundColor: "white",
-                  color: "#1e90ff",
-                  border: "none",
-                  cursor: "pointer",
-                  fontWeight: 500,
-                }}
-              >
-                Logout
-              </button>
+              {role === "customer" && (
+                <Dropdown align="end">
+                  <Dropdown.Toggle
+                    variant="secondary"
+                    style={{
+                      backgroundColor: "transparent",
+                      border: "none",
+                      color: "white",
+                      fontWeight: 500,
+                    }}
+                  >
+                    {user?.fullname || user?.name || "User"}
+                  </Dropdown.Toggle>
+
+                  <Dropdown.Menu>
+                    <Dropdown.Item onClick={() => navigate("/profile")}>
+                      Profile
+                    </Dropdown.Item>
+                    <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+              )}
+              {role === "admin" && (
+                <Link
+                  to="/admin"
+                  style={{
+                    color: "white",
+                    textDecoration: "none",
+                    fontWeight: 500,
+                  }}
+                >
+                  Admin
+                </Link>
+              )}
             </>
           ) : (
             <>
-              <button
-                onClick={handleLogin}
+              <Link
+                to="/login"
                 style={{
                   padding: "0.4rem 1rem",
                   border: "1px solid white",
                   borderRadius: "8px",
                   color: "white",
                   backgroundColor: "transparent",
-                  cursor: "pointer",
+                  textDecoration: "none",
                   fontWeight: 500,
                   transition: "0.3s",
                 }}
@@ -118,7 +113,7 @@ function Header() {
                 }}
               >
                 Đăng nhập
-              </button>
+              </Link>
               <Link
                 to="/register"
                 style={{

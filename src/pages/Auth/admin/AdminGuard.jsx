@@ -4,8 +4,12 @@ function AdminGuard({ children }) {
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
 
-  if (!token || role !== "ADMIN") {
+  if (!token) {
     return <Navigate to="/admin/login" replace />;
+  }
+
+  if (role !== "admin") {
+    return <Navigate to="/403" replace />;
   }
 
   return children;

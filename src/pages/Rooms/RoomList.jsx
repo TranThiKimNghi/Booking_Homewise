@@ -1,155 +1,173 @@
-import React, { useEffect, useState, useMemo } from "react";
-import { useSearchParams, Link} from "react-router-dom";// Import hook để đọc query params
-import { Card, Button, Row, Col, Spinner, Badge } from "react-bootstrap";
+// src/components/rooms/RoomList.jsx
+import React, { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { Card, Button, Row, Col, Spinner, Badge, Pagination, Container } from "react-bootstrap";
 import { FaBed, FaMoneyBillWave, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
-import roomService from "../../services/roomService"; 
-import formatCurrency from "../../utils/formatCurrency"; // <--- Hàm tiện ích để định dạng tiền tệ (cần tạo)
 
+import roomService from "../../services/roomService";
+import roomImageService from "../../services/roomImageService";
+import formatCurrency from "../../utils/formatCurrency";
+import RoomDetail from "./RoomDetail";
+
+const BACKEND_URL = "http://localhost:8082";
+const PAGE_SIZE = 6;
 
 function RoomList() {
-    // 1. Lấy hotelId từ URL Query Parameter
-    const [searchParams] = useSearchParams();
-    const hotelId = searchParams.get("hotelId"); 
-    
-    const [rooms, setRooms] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
+  const [searchParams] = useSearchParams();
+  const hotelId = searchParams.get("hotelId");
 
-    // 2. Fetch dữ liệu phòng (dựa trên hotelId)
-    useEffect(() => {
-        const fetchRooms = async () => {
-            if (!hotelId) {
-                // Nếu không có hotelId, không fetch và báo lỗi
-                setError("Thiếu ID khách sạn để tải danh sách phòng.");
-                setLoading(false);
-                return;
-            }
+  const [rooms, setRooms] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-            setLoading(true);
-            setError("");
+  const [selectedRoomId, setSelectedRoomId] = useState(null);
+  const [showDetail, setShowDetail] = useState(false);
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const resolveImageUrl = (url) => {
+    if (!url) return "/no-image.png";
+    return url.startsWith("http") ? url : `${BACKEND_URL}${url}`;
+  };
+
+  useEffect(() => {
+    if (!hotelId) {
+      setRooms([]);
+      setError("Chọn khách sạn để xem phòng.");
+      setLoading(false);
+      return;
+    }
+
+    const fetchRoomsWithImages = async () => {
+      try {
+        setLoading(true);
+        setError("");
+        const roomsData = await roomService.getByHotelId(hotelId);
+        const roomsWithImages = await Promise.all(
+          roomsData.map(async (room) => {
             try {
-                // *** ĐIỂM SỬA CHỮA: Gọi API chỉ lấy phòng của khách sạn này ***
-                // Giả định roomService.getRoomsByHotelId là hàm API chính xác
-                const data = await roomService.getRoomsByHotelId(hotelId); 
-                
-                // Giả định API trả về một mảng phòng
-                setRooms(Array.isArray(data) ? data : []);
-            } catch (err) {
-                console.error("Error fetching rooms:", err);
-                setError(err.response?.data?.message || "Có lỗi khi tải danh sách phòng!");
-            } finally {
-                setLoading(false);
+              const images = await roomImageService.getByRoomId(room.id);
+              const primary = images.find((img) => img.isPrimary);
+              const fallback = images[0];
+              return { ...room, imageUrl: resolveImageUrl(primary?.url || fallback?.url) };
+            } catch {
+              return { ...room, imageUrl: "/no-image.png" };
             }
-        };
-
-        fetchRooms();
-    }, [hotelId]); // Dependency: Chỉ chạy lại khi hotelId thay đổi
-
-    // 3. Xử lý trạng thái Loading/Error/Empty
-    if (loading) {
-        return (
-            <div className="text-center py-5">
-                <Spinner animation="border" variant="primary" />
-                <p className="mt-2 text-muted">Đang tải phòng...</p>
-            </div>
+          })
         );
-    }
+        setRooms(roomsWithImages);
+      } catch (err) {
+        console.error(err);
+        setError("Không thể tải danh sách phòng.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    if (error) {
-        return <div className="alert alert-danger text-center">{error}</div>;
-    }
+    fetchRoomsWithImages();
+  }, [hotelId]);
 
-    if (!rooms.length) {
-        return (
-            <div className="alert alert-info text-center">
-                Không tìm thấy phòng nào cho khách sạn này.
-            </div>
-        );
-    }
+  const openRoomDetail = (roomId) => {
+    setSelectedRoomId(roomId);
+    setShowDetail(true);
+  };
 
-    // 4. Render Danh sách phòng với giao diện đẹp mắt
-    return (
-        <Row className="g-4">
-            {rooms.map((room) => (
-                // Mỗi phòng chiếm 12 cột trên màn hình lớn để tối đa hóa diện tích Card ngang
-                <Col lg={12} key={room.id}>
-                    <Card className="shadow-lg border-0 room-card-hover" style={{ borderRadius: "10px" }}>
-                        <Row className="g-0">
-                            
-                            {/* Cột 1: Hình ảnh phòng */}
-                            <Col md={4} style={{ overflow: 'hidden' }}>
-                                <Card.Img
-                                    variant="top"
-                                    src={
-                                        room.imageUrl || `https://picsum.photos/400/250?random=${room.id}`
-                                    }
-                                    alt={room.roomType}
-                                    style={{ height: "100%", objectFit: "cover", borderRadius: "10px 0 0 10px" }}
-                                />
-                            </Col>
-                            
-                            {/* Cột 2: Chi tiết phòng */}
-                            <Col md={8}>
-                                <Card.Body className="d-flex flex-column justify-content-between p-4">
-                                    <div className="mb-3">
-                                        <div className="d-flex justify-content-between align-items-start">
-                                            {/* Loại phòng & Số phòng */}
-                                            <Card.Title className="text-primary fw-bold" style={{ fontSize: '1.4rem' }}>
-                                                <FaBed className="me-2" size={20} />
-                                                {room.roomType || "Loại phòng chưa xác định"} 
-                                                <span className="text-muted fw-normal ms-3" style={{ fontSize: '0.9rem' }}>
-                                                    (Phòng số: {room.roomNumber || 'N/A'})
-                                                </span>
-                                            </Card.Title>
+  const closeRoomDetail = () => {
+    setSelectedRoomId(null);
+    setShowDetail(false);
+  };
 
-                                            {/* Trạng thái phòng */}
-                                            {room.status === "available" ? (
-                                                <Badge bg="success" className="p-2 d-flex align-items-center">
-                                                    <FaCheckCircle className="me-1" /> CÒN PHÒNG
-                                                </Badge>
-                                            ) : (
-                                                <Badge bg="danger" className="p-2 d-flex align-items-center">
-                                                    <FaTimesCircle className="me-1" /> ĐÃ ĐẶT/HẾT
-                                                </Badge>
-                                            )}
-                                        </div>
+  // Phân trang
+  const totalPages = Math.ceil(rooms.length / PAGE_SIZE);
+  const paginatedRooms = rooms.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
-                                        {/* Mô tả */}
-                                        <Card.Text className="text-muted mt-2" style={{ fontSize: '0.95rem' }}>
-                                            {room.description || "Phòng có đầy đủ tiện nghi cơ bản, diện tích rộng rãi, và tầm nhìn đẹp."}
-                                        </Card.Text>
-                                    </div>
-                                    
-                                    {/* Giá và nút Đặt */}
-                                    <div className="d-flex justify-content-between align-items-center mt-auto pt-3 border-top">
-                                        <div className="fw-bold text-danger d-flex align-items-center">
-                                            <FaMoneyBillWave className="me-2" size={24} />
-                                            <span style={{ fontSize: '1.8rem' }}>
-                                                {/* Định dạng giá tiền */}
-                                                {formatCurrency(room.price) || "Liên hệ giá"}
-                                            </span>
-                                        </div>
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+  };
 
-                                        <Button 
-                                            
-                                            as={Link} 
-                                           
-                                            to={`/booking?roomId=${room.id}&hotelId=${hotelId}`}
+  if (loading) return (
+    <div className="text-center py-5">
+      <Spinner animation="border" variant="primary" />
+      <p className="mt-2 text-muted">Đang tải phòng...</p>
+    </div>
+  );
 
-                                            variant="primary" 
-                                            disabled={room.status !== "available"}
-                                        >
-                                            {room.status === "available" ? "Chọn phòng này" : "Tạm thời hết phòng"}
-                                        </Button>
-                                    </div>
-                                </Card.Body>
-                            </Col>
-                        </Row>
-                    </Card>
-                </Col>
-            ))}
-        </Row>
-    );
+  if (error) return <div className="alert alert-danger text-center">{error}</div>;
+  if (!rooms.length) return <div className="alert alert-info text-center">Không có phòng nào.</div>;
+
+  return (
+    <Container>
+      <Row className="g-4">
+        {paginatedRooms.map((room) => (
+          <Col lg={4} md={6} key={room.id}>
+            <Card className="h-100 shadow-sm">
+              <div className="position-relative overflow-hidden" style={{ height: "200px" }}>
+                <Card.Img
+                  src={room.imageUrl}
+                  alt={room.roomType}
+                  style={{ height: "100%", width: "100%", objectFit: "cover" }}
+                />
+                <Badge
+                  bg={room.status === "available" ? "success" : "danger"}
+                  className="position-absolute top-2 end-2 py-2 px-3"
+                >
+                  {room.status === "available" ? "CÒN PHÒNG" : "HẾT PHÒNG"}
+                </Badge>
+              </div>
+              <Card.Body className="d-flex flex-column justify-content-between">
+                <div>
+                  <Card.Title className="fw-bold text-primary">
+                    <FaBed className="me-2" />
+                    {room.roomType || "Loại phòng"} (Phòng {room.roomNumber})
+                  </Card.Title>
+                  <Card.Text className="text-muted">{room.description || "Phòng đầy đủ tiện nghi."}</Card.Text>
+                </div>
+                <div className="d-flex justify-content-between align-items-center mt-3">
+                  <div className="fw-bold text-danger d-flex align-items-center">
+                    <FaMoneyBillWave className="me-1" />
+                    {formatCurrency(room.price)}
+                  </div>
+                  <div className="d-flex gap-2">
+                    <Button size="sm" variant="info" onClick={() => openRoomDetail(room.id)}>Chi tiết</Button>
+                    <Button
+                      size="sm"
+                      variant="primary"
+                      href={`/booking?roomId=${room.id}&hotelId=${hotelId}`}
+                      disabled={room.status !== "available"}
+                    >
+                      Đặt phòng
+                    </Button>
+                  </div>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        ))}
+      </Row>
+
+      {/* Pagination kiểu Bootstrap */}
+     {totalPages > 1 && (
+  <div className="d-flex justify-content-center mt-4 gap-3">
+    <button
+      className="btn btn-outline-primary px-4"
+      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+      disabled={currentPage === 1}
+    >
+      Prev
+    </button>
+    <button
+      className="btn btn-outline-primary px-4"
+      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+      disabled={currentPage === totalPages}
+    >
+      Next
+    </button>
+  </div>
+)}
+
+      {showDetail && <RoomDetail show={showDetail} handleClose={closeRoomDetail} roomId={selectedRoomId} />}
+    </Container>
+  );
 }
 
 export default RoomList;

@@ -1,66 +1,28 @@
-
 import axios from "axios";
 
 const BASE_URL = "http://localhost:8082/api/services";
 
-const servicesService = {
-  // Lấy tất cả phòng
+const serviceService = {
   getAll: async () => {
-    try {
-      const res = await axios.get(BASE_URL);
-      console.log("Service API response:", res.data);
-      const rooms = res.data.data ?? res.data; 
-      return Array.isArray(rooms) ? rooms : [];
-    } catch (error) {
-      console.error("Error fetching service:", error);
-      return [];
-    }
+    const res = await axios.get(BASE_URL);
+    return res.data;
   },
-
-  // Lấy phòng theo id
   getById: async (id) => {
-    try {
-      const res = await axios.get(`${BASE_URL}/${id}`);
-      return res.data.data ?? res.data ?? null;
-    } catch (error) {
-      console.error(`Error fetching service ${id}:`, error);
-      return null;
-    }
+    const res = await axios.get(`${BASE_URL}/${id}`);
+    return res.data;
   },
- 
-  // Tạo mới phòng
-  create: async (data) => {
-    try {
-      const res = await axios.post(BASE_URL, data);
-      return res.data.data ?? res.data ?? null;
-    } catch (error) {
-      console.error("Error creating service:", error);
-      throw error;
-    }
+  create: async (service) => {
+    const res = await axios.post(BASE_URL, service);
+    return res.data;
   },
-
-  // Cập nhật phòng
-  update: async (id, data) => {
-    try {
-      const res = await axios.put(`${BASE_URL}/${id}`, data);
-      return res.data.data ?? res.data ?? null;
-    } catch (error) {
-      console.error(`Error updating service ${id}:`, error);
-      throw error;
-    }
+  update: async (id, service) => {
+    const res = await axios.put(`${BASE_URL}/${id}`, service);
+    return res.data;
   },
-
-  // Xóa phòng
   delete: async (id) => {
-    try {
-      const res = await axios.delete(`${BASE_URL}/${id}`);
-      return res.data.data ?? res.data ?? null;
-    } catch (error) {
-      console.error(`Error deleting service ${id}:`, error);
-      throw error;
-    }
+    const res = await axios.delete(`${BASE_URL}/${id}`);
+    return res.data;
   },
 };
 
-
-export default roomService;
+export default serviceService;

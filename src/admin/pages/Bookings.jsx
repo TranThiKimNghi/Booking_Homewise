@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Table, Button } from "react-bootstrap";
-import BookingModal from "../components/BookingModal";
-import BookingFormModal from "../components/BookingFormModal";
+import BookingModal from "../components/models/BookingModal";
+import BookingFormModal from "../components/models/BookingFormModal";
 import bookingService from "../../services/bookingService";
 
 function Bookings() {
