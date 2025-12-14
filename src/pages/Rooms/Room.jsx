@@ -1,12 +1,19 @@
+// src/pages/Rooms/Rooms.jsx
 import React from "react";
+import { useSearchParams } from "react-router-dom";
 import { Container } from "react-bootstrap";
-import RoomList from "../components/Room/RoomList";
+
+import RoomList from "./RoomList"; // danh sách theo khách sạn
+import AllRooms from "./AllRooms"; // tất cả phòng
 
 function Rooms() {
+  const [searchParams] = useSearchParams();
+  const hotelId = searchParams.get("hotelId");
+
   return (
     <Container className="py-5">
       {/* 🏞️ Banner */}
-      <div
+      {/* <div
         className="p-5 mb-5 text-center text-white shadow-lg d-flex flex-column justify-content-center align-items-center"
         style={{
           backgroundImage:
@@ -17,16 +24,11 @@ function Rooms() {
           minHeight: "220px",
         }}
       >
-        <h1 className="display-5 fw-bolder mb-2 text-shadow">
-          Chọn phòng bạn muốn đặt
-        </h1>
-        <p className="lead fw-normal text-shadow">
-          Danh sách các phòng có sẵn trong khách sạn
-        </p>
-      </div>
+        
+      </div> */}
 
       {/* 🏨 ROOM LIST */}
-      <RoomList />
+      {hotelId ? <RoomList /> : <AllRooms />}
 
       <style jsx="true">{`
         .text-shadow {

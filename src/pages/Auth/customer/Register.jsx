@@ -28,60 +28,77 @@ function Register() {
       setError("Đăng ký thất bại. Vui lòng thử lại.");
     }
   };
-
   return (
-    <div className="auth-box container py-5" style={{ maxWidth: "400px" }}>
-      <h2 className="mb-4 text-center">Register</h2>
+    <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
+      <div className="card shadow-lg p-4" style={{ maxWidth: "400px", width: "100%", borderRadius: "12px" }}>
+        <h2 className="text-center mb-4 fw-bold text-success">Đăng ký</h2>
 
-      {error && <div className="alert alert-danger">{error}</div>}
+        {error && <div className="alert alert-danger text-center">{error}</div>}
 
-      <form onSubmit={handleRegister}>
-        <div className="mb-3">
-          <input
-            name="fullname"
-            placeholder="Fullname"
-            className="form-control"
-            value={form.fullname}
-            onChange={handleChange}
-            required
-          />
+        <form onSubmit={handleRegister}>
+          <div className="mb-3">
+            <label htmlFor="fullname" className="form-label fw-semibold">Họ và tên</label>
+            <input
+              id="fullname"
+              name="fullname"
+              placeholder="Nhập họ và tên"
+              className="form-control form-control-lg"
+              value={form.fullname}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="mb-3">
+            <label htmlFor="email" className="form-label fw-semibold">Email</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="Nhập email"
+              className="form-control form-control-lg"
+              value={form.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="mb-3">
+            <label htmlFor="phone" className="form-label fw-semibold">Số điện thoại</label>
+            <input
+              id="phone"
+              name="phone"
+              placeholder="Nhập số điện thoại"
+              className="form-control form-control-lg"
+              value={form.phone}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="password" className="form-label fw-semibold">Mật khẩu</label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              placeholder="Nhập mật khẩu"
+              className="form-control form-control-lg"
+              value={form.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <button type="submit" className="btn btn-success w-100 btn-lg">Đăng ký</button>
+        </form>
+
+        <div className="text-center mt-3">
+          <small className="text-muted">
+            Đã có tài khoản? <a href="/login" className="text-success fw-semibold">Đăng nhập</a>
+          </small>
         </div>
-        <div className="mb-3">
-          <input
-            name="email"
-            placeholder="Email"
-            className="form-control"
-            type="email"
-            value={form.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <input
-            name="phone"
-            placeholder="Phone"
-            className="form-control"
-            value={form.phone}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <input
-            name="password"
-            placeholder="Password"
-            type="password"
-            className="form-control"
-            value={form.password}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <button type="submit" className="btn btn-success w-100">
-          Register
-        </button>
-      </form>
+      </div>
     </div>
   );
 }

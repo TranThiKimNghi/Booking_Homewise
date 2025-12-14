@@ -1,104 +1,122 @@
-import React, { useState, useEffect, useContext } from "react";
-import { Table, Container, Spinner, Alert, Badge, Card } from "react-bootstrap";
-import { FaCalendarAlt, FaClock, FaMoneyBillWave, FaInfoCircle } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Card, Badge, Button, Spinner, Alert, Row, Col } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import { FaCalendarAlt } from "react-icons/fa"; // Icon lịch
 import bookingService from "../../services/bookingService";
 import formatCurrency from "../../utils/formatCurrency";
-import formatDate from "../../utils/formatDate";
-import { AuthContext } from "../../contexts/AuthContext";
-
-const getStatusVariant = (status) => {
-  switch (status?.toLowerCase()) {
-    case "pending":
-      return "warning";
-    case "approved":
-      return "success";
-    case "cancelled":
-      return "danger";
-    default:
-      return "secondary";
-  }
-};
 
 function BookingList() {
-  const { user } = useContext(AuthContext); // user hiện tại
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const loadBookings = async () => {
+    try {
+      const res = await bookingService.getMyBookings();
+      setBookings(res.data);
+    } catch (err) {
+      setError("Không thể tải danh sách booking");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchBookings = async () => {
-      if (!user?.id) {
-        setError("Bạn cần đăng nhập để xem lịch sử đặt phòng.");
-        setLoading(false);
-        return;
-      }
-      try {
-        const data = await bookingService.getByUser(user.id);
-        setBookings(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error(err);
-        setError("Không thể tải danh sách đặt phòng.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchBookings();
-  }, [user]);
+    loadBookings();
+  }, []);
+
+  const handleCancel = async (id) => {
+    if (!window.confirm("Bạn chắc chắn muốn huỷ booking này?")) return;
+
+    try {
+      await bookingService.delete(id);
+      setBookings(bookings.filter(b => b.id !== id));
+    } catch {
+      alert("Huỷ booking thất bại");
+    }
+  };
+
+  const handleSuggestSchedule = (booking) => {
+    // Navigate tới /schedule và truyền booking
+    navigate("/schedule", { state: { booking } });
+  };
+
+  const renderStatus = (status) => {
+    switch (status) {
+      case "pending": return <Badge bg="warning">Pending</Badge>;
+      case "confirmed": return <Badge bg="success">Confirmed</Badge>;
+      case "cancelled": return <Badge bg="secondary">Cancelled</Badge>;
+      default: return <Badge bg="dark">{status}</Badge>;
+    }
+  };
 
   if (loading) {
     return (
       <div className="text-center py-5">
-        <Spinner animation="border" variant="primary" />
-        <p className="mt-2 text-muted">Đang tải lịch sử đặt phòng...</p>
+        <Spinner animation="border" />
       </div>
     );
   }
 
-  if (error) {
-    return <Alert variant="danger" className="text-center">{error}</Alert>;
-  }
-
-  if (!bookings.length) {
-    return <Alert variant="info" className="text-center">Bạn chưa có lịch sử đặt phòng nào.</Alert>;
-  }
-
   return (
-    <Container className="py-4">
-      <h2 className="mb-4 text-primary fw-bold">Lịch sử Đặt phòng của bạn</h2>
-      <Card className="shadow-sm">
-        <Card.Body className="p-0">
-          <Table striped hover responsive className="mb-0">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Ngày Check-in</th>
-                <th>Ngày Check-out</th>
-                <th>Tổng tiền</th>
-                <th>Trạng thái</th>
-                <th>Chi tiết</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bookings.map((booking, index) => (
-                <tr key={booking.id}>
-                  <td>{index + 1}</td>
-                  <td><FaCalendarAlt className="text-info me-1" /> {formatDate(booking.checkingDate)}</td>
-                  <td><FaClock className="text-danger me-1" /> {formatDate(booking.checkoutDate)}</td>
-                  <td><FaMoneyBillWave className="me-1" /> {formatCurrency(booking.totalAmount)}</td>
-                  <td><Badge bg={getStatusVariant(booking.status)} className="p-2">{booking.status?.toUpperCase() || "KHÔNG RÕ"}</Badge></td>
-                  <td>
-                    <Link to={`/bookings/${booking.id}`} className="text-primary">
-                      <FaInfoCircle className="me-1" /> Xem
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </Card.Body>
-      </Card>
-    </Container>
+    <div className="container py-4">
+      <h3 className="mb-4 text-primary">📋 Booking của tôi</h3>
+
+      {error && <Alert variant="danger">{error}</Alert>}
+      {bookings.length === 0 && <Alert variant="info">Bạn chưa có booking nào</Alert>}
+
+      <Row className="g-3">
+        {bookings.map((b) => (
+          <Col key={b.id} md={6} lg={4}>
+            <Card className="h-100 shadow-sm rounded-4 border-0 hover-card">
+              <Card.Body className="d-flex flex-column justify-content-between">
+                <div>
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <h5>Booking #{b.id.slice(0,8)}</h5>
+                    <div>{renderStatus(b.status)}</div>
+                  </div>
+                  <p className="text-muted small mb-1">
+                    {b.checkingDate} → {b.checkoutDate}
+                  </p>
+                  <div className="fw-bold mb-2">{formatCurrency(b.totalAmount)}</div>
+                </div>
+
+                <div className="d-flex gap-2 flex-wrap">
+                  <Button
+                    size="sm"
+                    variant="primary"
+                    onClick={() =>
+                      navigate("/booking-detail", { state: { booking: b } })
+                    }
+                  >
+                    Chi tiết
+                  </Button>
+
+                  {b.status === "pending" && (
+                    <Button
+                      size="sm"
+                      variant="outline-danger"
+                      onClick={() => handleCancel(b.id)}
+                    >
+                      Huỷ
+                    </Button>
+                  )}
+
+                  <Button
+                    size="sm"
+                    variant="outline-success"
+                    onClick={() => handleSuggestSchedule(b)}
+                  >
+                    <FaCalendarAlt className="me-1" /> Gợi ý lịch trình
+                  </Button>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        ))}
+      </Row>
+    </div>
   );
 }
 

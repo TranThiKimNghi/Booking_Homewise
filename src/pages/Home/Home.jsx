@@ -1,17 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  Container,
-  Row,
-  Col,
-  Card,
-  Button,
-  Form,
-  Dropdown,
-  Spinner,
-} from "react-bootstrap";
+import { Container, Row, Col, Card, Button, Form,Dropdown,Spinner,} from "react-bootstrap";
 import { FaUserFriends, FaMapMarkerAlt, FaSearch } from "react-icons/fa";
-
 import Banner from "../../components/Header/Banner";
 import hotelService from "../../services/hotelService";
 import hotelImageService from "../../services/hotelImageService";
@@ -71,7 +61,7 @@ function Home() {
           })
         );
 
-        setHotels(hotelsWithImages);
+        setHotels(hotelsWithImages.slice(0, 20));
       } catch (err) {
         console.error(err);
         setErrorHotels("Không thể tải danh sách khách sạn");

@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import { Dropdown } from "react-bootstrap";
+import { Button } from "react-bootstrap";
 
 function Header() {
   const { isAuthenticated, user, role, logout } = useAuth();
@@ -24,6 +24,7 @@ function Header() {
           boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
         }}
       >
+        {/* Logo */}
         <div>
           <Link
             to="/"
@@ -38,6 +39,7 @@ function Header() {
           </Link>
         </div>
 
+        {/* Menu */}
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
           <Link
             to="/"
@@ -55,27 +57,30 @@ function Header() {
           {isAuthenticated ? (
             <>
               {role === "customer" && (
-                <Dropdown align="end">
-                  <Dropdown.Toggle
-                    variant="secondary"
+                <>
+                  <Link
+                    to="/profile"
                     style={{
-                      backgroundColor: "transparent",
-                      border: "none",
                       color: "white",
+                      textDecoration: "none",
                       fontWeight: 500,
                     }}
                   >
-                    {user?.fullname || user?.name || "User"}
-                  </Dropdown.Toggle>
-
-                  <Dropdown.Menu>
-                    <Dropdown.Item onClick={() => navigate("/profile")}>
-                      Profile
-                    </Dropdown.Item>
-                    <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
-                  </Dropdown.Menu>
-                </Dropdown>
+                    Profile
+                  </Link>
+                  <Link
+                    to="/bookings/me"
+                    style={{
+                      color: "white",
+                      textDecoration: "none",
+                      fontWeight: 500,
+                    }}
+                  >
+                    Lịch sử đặt phòng
+                  </Link>
+                </>
               )}
+
               {role === "admin" && (
                 <Link
                   to="/admin"
@@ -88,6 +93,11 @@ function Header() {
                   Admin
                 </Link>
               )}
+
+              {/* Nút Logout */}
+              <Button variant="outline-light" size="sm" onClick={handleLogout}>
+                Logout
+              </Button>
             </>
           ) : (
             <>

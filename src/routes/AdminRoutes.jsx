@@ -10,12 +10,14 @@ import Hotels from "../admin/pages/Hotels";
 export default function AdminRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Dashboard />} />
-      <Route path="/rooms" element={<Rooms />} />
-      <Route path="/bookings" element={<Bookings />} />
-      <Route path="/users" element={<Users />} />
-      <Route path="/hotels" element={<Hotels />} />
+      {/* /admin => Dashboard */}
+       <Route index element={<Dashboard />} />
+    <Route path="users" element={<Users />} />
+    <Route path="rooms" element={<Rooms />} />
+    <Route path="hotels" element={<Hotels />} />
+    <Route path="bookings" element={<Bookings />} />
 
+      {/* fallback */}
       <Route
         path="*"
         element={<h2 className="text-center mt-5">Page Not Found</h2>}

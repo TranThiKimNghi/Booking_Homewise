@@ -4,10 +4,13 @@ import ProtectedRoute from "./ProtectedRoute";
 
 /* ================= USER PAGES ================= */
 import Home from "../pages/Home/Home";
-import RoomList from "../pages/Rooms/RoomList";
+import Rooms from "../pages/Rooms/Room";
 import BookingForm from "../pages/Booking/BookingForm";
+import BookingDetail from "../pages/Booking/Booking_detail";
 import Profile from "../pages/UserProfile/Profile";
 import HotelList from "../pages/Hotels/HotelList";
+import BookingList from "../pages/Booking/BookingList";
+import BookingSchedule from "../pages/Schedule/BookingSchedule";
 
 /* ================= AUTH ================= */
 import Login from "../pages/Auth/customer/CustomerHome";
@@ -27,14 +30,27 @@ function AppRoutes() {
       {/* ===== PUBLIC ===== */}
       <Route path="/" element={<Home />} />
       <Route path="/hotels" element={<HotelList />} />
-      <Route path="/rooms" element={<RoomList />} />
-
-      {/* ===== AUTH ===== */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/admin/login" element={<AdminLogin />} />
+      <Route path="/rooms" element={<Rooms />} />
+      <Route path="/rooms-hotel" element={<Rooms />} />
+      <Route path="/bookings/me" element={<BookingList />} />
 
       {/* ===== CUSTOMER PROTECTED ===== */}
+      <Route
+        path="/booking-detail"
+        element={
+          <ProtectedRoute role="customer">
+            <BookingDetail />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/schedule"
+        element={
+          <ProtectedRoute role="customer">
+            <BookingSchedule />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/booking"
         element={
@@ -43,7 +59,6 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/profile"
         element={
@@ -52,6 +67,11 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+      {/* ===== AUTH ===== */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/admin/login" element={<AdminLogin />} />
 
       {/* ===== ADMIN PROTECTED ===== */}
       <Route
@@ -67,7 +87,6 @@ function AppRoutes() {
 
       {/* ===== ERROR ===== */}
       <Route path="/403" element={<Forbidden />} />
-
       <Route
         path="*"
         element={<h2 className="text-center mt-5">404 - Page Not Found</h2>}
