@@ -1,25 +1,21 @@
-// import React from "react";
-// import ReactDOM from "react-dom/client";
-// import App from "./App";
-// import "bootstrap/dist/css/bootstrap.min.css"; // import bootstrap
-
-// ReactDOM.createRoot(document.getElementById("root")).render(
-//   <React.StrictMode>
-//     <App />
-//   </React.StrictMode>
-// );
-
-
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BrowserRouter } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext.jsx";
+// import KeycloakProvider from "./keycloak/KeycloakProvider";
 
-ReactDOM.createRoot(document.getElementById("root")).render(
+const root = ReactDOM.createRoot(document.getElementById("root"));
+
+root.render(
   <React.StrictMode>
-    <BrowserRouter> {/* ← phải wrap ở đây */}
-      <App />
-    </BrowserRouter>
+     <AuthProvider> 
+        {/* <KeycloakProvider>     */}
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        {/* </KeycloakProvider> */}
+     </AuthProvider> 
   </React.StrictMode>
 );
