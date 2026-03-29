@@ -192,7 +192,7 @@ function HotelList({ filter = {} }) {
                           overflow: "hidden",
                         }}
                       >
-                        {hotel.description || "Mô tả đang cập nhật."}
+                        
                       </p>
                     </div>
 
