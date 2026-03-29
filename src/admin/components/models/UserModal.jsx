@@ -2,32 +2,41 @@ import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 
 function UserModal({ show, handleClose, handleSave, userData }) {
-  const [fullName, setFullName] = useState("");
+  const [fullname, setFullname] = useState("");
   const [email, setEmail] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [role, setRole] = useState("");
+  const [phone, setPhone] = useState("");
+  const [roles, setRoles] = useState("");
+  const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (userData) {
-      setFullName(userData.fullName || "");
+      setFullname(userData.fullname || "");
       setEmail(userData.email || "");
-      setPhoneNumber(userData.phoneNumber || "");
-      setRole(userData.role || "");
+      setPhone(userData.phone || "");
+      setRoles(userData.roles || "");
+      setPassword(""); // edit không cần password
     } else {
-      setFullName("");
+      setFullname("");
       setEmail("");
-      setPhoneNumber("");
-      setRole("");
+      setPhone("");
+      setRoles("");
+      setPassword("");
     }
     setErrors({});
   }, [userData, show]);
 
   const validate = () => {
     let err = {};
-    if (!fullName) err.fullName = "Required";
-    if (!email) err.email = "Required";
-    if (!role) err.role = "Required";
+    if (!fullname) err.fullname = "Họ và tên bắt buộc";
+    if (!email) err.email = "Email bắt buộc";
+    if (!roles) err.roles = "Vai trò bắt buộc";
+
+    // chỉ bắt buộc password khi tạo mới
+    if (!userData && !password) {
+      err.password = "Mật khẩu bắt buộc";
+    }
+
     return err;
   };
 
@@ -40,10 +49,11 @@ function UserModal({ show, handleClose, handleSave, userData }) {
 
     handleSave({
       id: userData ? userData.id : undefined,
-      fullName,
+      fullname,
       email,
-      phoneNumber,
-      role,
+      phone,
+      roles,
+      password: userData ? undefined : password, // chỉ gửi khi create
     });
 
     handleClose();
@@ -52,21 +62,27 @@ function UserModal({ show, handleClose, handleSave, userData }) {
   return (
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
-        <Modal.Title>{userData ? "Cập nhật người dùng" : "Thêm người dùng"}</Modal.Title>
+        <Modal.Title>
+          {userData ? "Cập nhật người dùng" : "Thêm người dùng"}
+        </Modal.Title>
       </Modal.Header>
+
       <Modal.Body>
         <Form>
-
+          {/* Fullname */}
           <Form.Group className="mb-3">
-            <Form.Label>Họ tên</Form.Label>
+            <Form.Label>Họ và tên</Form.Label>
             <Form.Control
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder="Nhập họ tên"
+              value={fullname}
+              onChange={(e) => setFullname(e.target.value)}
+              placeholder="Nhập họ và tên"
             />
-            {errors.fullName && <small className="text-danger">{errors.fullName}</small>}
+            {errors.fullname && (
+              <small className="text-danger">{errors.fullname}</small>
+            )}
           </Form.Group>
 
+          {/* Email */}
           <Form.Group className="mb-3">
             <Form.Label>Email</Form.Label>
             <Form.Control
@@ -75,34 +91,55 @@ function UserModal({ show, handleClose, handleSave, userData }) {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Nhập email"
             />
-            {errors.email && <small className="text-danger">{errors.email}</small>}
+            {errors.email && (
+              <small className="text-danger">{errors.email}</small>
+            )}
           </Form.Group>
 
+          {/* Password - chỉ hiện khi thêm */}
+          {!userData && (
+            <Form.Group className="mb-3">
+              <Form.Label>Mật khẩu</Form.Label>
+              <Form.Control
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Nhập mật khẩu"
+              />
+              {errors.password && (
+                <small className="text-danger">{errors.password}</small>
+              )}
+            </Form.Group>
+          )}
+
+          {/* Phone */}
           <Form.Group className="mb-3">
             <Form.Label>Số điện thoại</Form.Label>
             <Form.Control
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
               placeholder="Nhập số điện thoại"
             />
           </Form.Group>
 
+          {/* Roles */}
           <Form.Group className="mb-3">
             <Form.Label>Vai trò</Form.Label>
             <Form.Select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
+              value={roles}
+              onChange={(e) => setRoles(e.target.value)}
             >
               <option value="">Chọn vai trò</option>
               <option value="admin">Admin</option>
-              <option value="staff">Nhân viên</option>
-              <option value="customer">Khách hàng</option>
+              <option value="customer">Customer</option>
             </Form.Select>
-            {errors.role && <small className="text-danger">{errors.role}</small>}
+            {errors.roles && (
+              <small className="text-danger">{errors.roles}</small>
+            )}
           </Form.Group>
-
         </Form>
       </Modal.Body>
+
       <Modal.Footer>
         <Button variant="secondary" onClick={handleClose}>
           Hủy
